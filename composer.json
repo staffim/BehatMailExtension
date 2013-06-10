@@ -37,7 +37,7 @@
     },
 
     "autoload": {
-        "psr-0": { "Behat\\MailExtension": "src/" }
+        "psr-0": { "Staffim\\Behat\\MailExtension": "src/" }
     },
 
     "config": {
