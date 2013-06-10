@@ -36,6 +36,10 @@
         "phpspec/phpspec": "2.0.*@beta"
     },
 
+    "autoload": {
+        "psr-0": { "Behat\\MailExtension": "src/" }
+    },
+
     "config": {
         "bin-dir": "bin"
     }
