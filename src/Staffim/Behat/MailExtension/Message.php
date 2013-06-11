@@ -15,44 +15,6 @@ class Message
     }
 
     /**
-     * @param string $mailServer
-     * @param string $subject
-     * @param string $body
-     * @param string $from
-     * @param string $to
-     */
-    // TODO Remove $mailServer from this template method. May be move to Mailbox class.
-    public static function createAndSendTo($mailServer, $subject, $body, $from, $to)
-    {
-        $mail = new \ezcMailComposer();
-        $mail->from = new \ezcMailAddress($from);
-        $mail->addTo(new \ezcMailAddress($to));
-        $mail->headers->offsetSet('Reply-To', $from);
-        $mail->subject = stripcslashes($subject);
-        $mail->plainText = stripcslashes($body);
-        $mail->build();
-
-        $transport = new \ezcMailSmtpTransport($mailServer);
-        $transport->send($mail);
-        $transport->disconnect();
-    }
-
-    /**
-     * @param string $mailServer
-     * @param string $text
-     */
-    // TODO Remove $mailServer from this template method. May be move to Mailbox class.
-    public function reply($mailServer, $text)
-    {
-        $replyMail = \ezcMailTools::replyToMail($this->mail, $this->mail->to[0]);
-        $replyMail->body = new \ezcMailText($text, 'utf8', '8bit', 'utf8');
-
-        $transport = new \ezcMailSmtpTransport($mailServer);
-        $transport->send($replyMail);
-        $transport->disconnect();
-    }
-
-    /**
      * Not for body object.
      *
      * @param string $attr
@@ -70,8 +32,7 @@ class Message
      *
      * @return bool
      */
-    // TODO Rename to "isEqualBySubjectTo".
-    public function isEqualToSubject($subject)
+    public function isEqualBySubject($subject)
     {
         // Only strcmp() for strings.
         return !strcmp($this->mail->subject, $subject);
@@ -82,7 +43,7 @@ class Message
      *
      * @return bool
      */
-    public function isEqualToSenderAddress($address)
+    public function isEqualBySenderAddress($address)
     {
         return $this->mail->from->email == $address;
     }
@@ -92,7 +53,7 @@ class Message
      *
      * @return bool
      */
-    public function isEqualToSenderName($senderName)
+    public function isEqualBySenderName($senderName)
     {
         return $this->mail->from->name == $senderName;
     }
