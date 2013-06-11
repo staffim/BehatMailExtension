@@ -1,12 +1,44 @@
 <?php
 
-namespace Staffim\Behat\MailExtension;
+namespace Staffim\Behat\MailExtension\Context;
 
 use Behat\Behat\Context\Step;
 use Behat\Behat\Context\BehatContext;
+use Behat\Behat\Context\TranslatedContextInterface;
+use Staffim\Behat\MailExtension\Context\MailAwareInterface;
 
-class MailContext extends BehatContext
+class RawMailContext extends BehatContext implements MailAwareInterface
+//    implements TranslatedContextInterface
 {
+//    public function getTranslationResources()
+//    {
+//        return glob(__DIR__ . '/../../../../i18n/*.xliff');
+//    }
+
+    /**
+     * Initializes context.
+     * Every scenario gets it's own context object.
+     *
+     * @param array $parameters context parameters (set them up through behat.yml)
+     */
+    public function __construct(array $parameters)
+    {
+        // Initialize your context here
+        $this->context = $parameters;
+    }
+
+//    /**
+//     * Выход с почтового сервера при сценарии с почтой
+//     *
+//     * @AfterScenario @mail
+//     */
+//    public function afterFailedMail(ScenarioEvent $event)
+//    {
+//        if ($this->hasMailbox()) {
+//            $this->iSignOutMailServer();
+//        };
+//    }
+
     /**
      * @var \Staffim\Behat\MailExtension\Message
      */
@@ -38,13 +70,13 @@ class MailContext extends BehatContext
      * @throws \Exception
      */
     // TODO To option.
-    private function getMailbox()
+    private function getMailAgent()
     {
         if (!$this->mailbox) {
             throw new \Exception('Mailbox not created');
         }
 
-        return $this->mailbox;
+        return $this->mailAgent;
     }
 
     /**
