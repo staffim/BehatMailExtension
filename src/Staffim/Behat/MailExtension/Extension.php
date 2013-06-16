@@ -2,13 +2,14 @@
 
 namespace Staffim\Behat\MailExtension;
 
-//use Behat\Behat\Extension\Extension;
 use Behat\Behat\Extension\ExtensionInterface;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class Extension implements ExtensionInterface
+class Extension extends \Behat\Behat\Extension\Extension implements ExtensionInterface
 {
     /**
      * @param array                                                   $config
@@ -16,9 +17,26 @@ class Extension implements ExtensionInterface
      */
     public function load(array $config, ContainerBuilder $container)
     {
-        $container->setParameter('behat.mail_extension.server', $config['mailServer']);
-        $container->setParameter('behat.mail_extension.address', $config['mailAddress']);
-        $container->setParameter('behat.mail_extension.auth', $config['mailAuth']);
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__));
+        $loader->load('ExtensionServices.yml');
+
+//        var_dump($config);
+        foreach ($config as $ns => $tlValue) {
+            if (!is_array($tlValue)) {
+                $container->setParameter("behat.mail_extension.$ns", $tlValue);
+            } else {
+                foreach ($tlValue as $name => $value) {
+                    $container->setParameter("behat.mail_extension.$ns.$name", $value);
+                }
+            }
+        }
+        $container->setParameter('behat.mail_extension.parameters', $config);
+
+
+
+//        $container->setParameter('behat.mail_extension.pop3_server', $config['pop3Server']);
+//        $container->setParameter('behat.mail_extension.address', $config['baseAddress']);
+//        $container->setParameter('behat.mail_extension.pop3_auth', $config['pop3Auth']);
     }
 
     /**
@@ -28,21 +46,34 @@ class Extension implements ExtensionInterface
     {
         $builder->
             children()->
-                scalarNode('mailServer')->
-                    defaultNull()->
+                scalarNode('pop3Server')->
+                    defaultValue(isset($config['pop3Server']) ? $config['pop3Server'] : 'localhost')->
                 end()->
-                arrayNode('mailAuth')->
+                arrayNode('pop3Auth')->
                     children()->
                         scalarNode('login')->
-                            defaultValue('anonymous')->
+                            defaultValue(isset($config['pop3Auth']['login']) ? $config['pop3Auth']['login'] : 'anonymous')->
                         end()->
                         scalarNode('password')->
-                            defaultValue('')->
+                            defaultValue(isset($config['pop3Auth']['password']) ? $config['pop3Auth']['password'] : '')->
                         end()->
                     end()->
                 end()->
-                scalarNode('mailAddress')->
-                    defaultNull()->
+                scalarNode('smtpServer')->
+                    defaultValue(isset($config['smtpServer']) ? $config['smtpServer'] : 'localhost')->
+                end()->
+                arrayNode('smtpAuth')->
+                    children()->
+                        scalarNode('login')->
+                            defaultValue(isset($config['smtpAuth']['login']) ? $config['smtpAuth']['login'] : 'anonimous')->
+                        end()->
+                        scalarNode('password')->
+                            defaultValue(isset($config['smtpAuth']['password']) ? $config['smtpAuth']['password'] : '')->
+                        end()->
+                    end()->
+                end()->
+                scalarNode('baseAddress')->
+                    defaultValue(isset($config['baseAddress']) ? $config['baseAddress'] : '')->
                 end()->
             end()->
         end();

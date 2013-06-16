@@ -2,15 +2,19 @@
 
 namespace Staffim\Behat\MailExtension;
 
-use Message;
+use Staffim\Behat\MailExtension\Mailbox;
 
-class MailAgent
-//    implements MailAgentInterface
+class MailAgent implements MailAgentInterface
 {
     /**
      * @var \ezcMailPop3Transport
      */
-    private $mailPop3Transport;
+    private $pop3Transport;
+
+    /**
+     * @var \ezcMailSmtpTransport
+     */
+    private $smtpTransport;
 
     /**
      * @var \ezcMailParser
@@ -18,22 +22,47 @@ class MailAgent
     private $mailParser;
 
     /**
-     * @var String
-     */
-    private $mailServer;
-
-    /**
      * @var Mailbox
      */
     private $mailbox;
 
-    public function __construct($mailPop3Server, $user, $password)
+    public function __construct(AccountInterface $pop3Account, AccountInterface $smtpAccount=null)
     {
-        $this->mailServer = $mailPop3Server;
-        $this->mailPop3Transport = new \ezcMailPop3Transport($mailPop3Server);
+        $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
+        $this->pop3Transport->authenticate($pop3Account->getUser(), $pop3Account->getPassword());
+
         $this->mailParser = new \ezcMailParser();
 
-        $this->mailPop3Transport->authenticate($user, $password);
+        if ($smtpAccount) {
+            $this->connectSmtpServer($smtpAccount);
+        }
+    }
+
+    public function connectSmtpServer(AccountInterface $smtpAccount)
+    {
+        try {
+            if (!!$this->smtpTransport) {
+                $this->smtpTransport->disconnect();
+            }
+        } catch (\ezcMailTransportException $e) {
+            // Ignore transport exceptions.
+        }
+
+        $this->smtpTransport = new \ezcMailSmtpTransport($smtpAccount->getServerName(), $smtpAccount->getUser(), $smtpAccount->getPassword());
+    }
+
+    public function connectPop3Server(AccountInterface $pop3Account)
+    {
+        try {
+            if (!!$this->pop3Transport) {
+                $this->pop3Transport->disconnect();
+            }
+        } catch (\ezcMailTransportException $e) {
+            // Ignore transport exceptions.
+        }
+
+        $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
+        $this->pop3Transport->authenticate($pop3Account->getUser(), $pop3Account->getPassword());
     }
 
     public function __destruct()
@@ -44,44 +73,46 @@ class MailAgent
     public function disconnect()
     {
         try {
-            $this->mailPop3Transport->disconnect();
+            $this->pop3Transport->disconnect();
+            $this->smtpTransport->disconnect();
         } catch (\ezcMailTransportException $e) {
              // Ignore transport exceptions.
         }
     }
 
-    public function deleteMessages()
+    public function getSmtpTransport()
     {
-        $count = $this->number();
-        for ( $numMessage = 1; $numMessage <= $count; $numMessage++) {
-            $this->mailPop3Transport->delete($numMessage);
+        if (!!$this->smtpTransport) {
+
+            return $this->smtpTransport;
         }
     }
 
+
     public function size()
     {
-        $this->mailPop3Transport->status($dummy, $sizeMail);
+        $this->pop3Transport->status($dummy, $sizeMail);
 
         return $sizeMail;
     }
 
     public function number()
     {
-        $this->mailPop3Transport->status($numMail, $dummy);
+        $this->pop3Transport->status($numMail, $dummy);
 
         return $numMail;
     }
 
-    public function receiveMail()
+    /**
+     * @param Mailbox $mailbox
+     */
+    public function setMailbox($mailbox)
     {
-        $mails = $this->mailPop3Transport->fetchAll();
-        $mails = $this->mailParser->parseMail($mails);
-
-        $this->setMailbox(new Mailbox($mails));
+        $this->mailbox = $mailbox;
     }
 
     /**
-     * @return \Staffim\Behat\MailExtension\Mailbox
+     * @return Mailbox
      *
      * @throws \Exception
      */
@@ -89,19 +120,44 @@ class MailAgent
     public function getMailbox()
     {
         if (!$this->mailbox) {
-            throw new \Exception('Mailbox not created');
+            $this->receive();
         }
 
         return $this->mailbox;
     }
 
     /**
-     * @param \Staffim\Behat\MailExtension\Mailbox $mailbox
+     * Receive messages to mailbox
      */
-    public function setMailbox($mailbox)
+    public function receive()
     {
+        var_dump("Receive", $this->number());
+        $mails = $this->pop3Transport->fetchAll();
+        $mails = $this->mailParser->parseMail($mails);
 
-        $this->mailbox = $mailbox;
+        $this->setMailbox(new Mailbox($mails));
+    }
+
+    /**
+     * @param \ezcMail $mail
+     */
+    public function send($mail)
+    {
+        $this->smtpTransport->send($mail);
+    }
+
+    /**
+     * Remove messages from server
+     */
+    public function removeMessages()
+    {
+        $count = $this->number();
+        for ($numMessage = 1; $numMessage <= $count; $numMessage++) {
+            $this->pop3Transport->delete($numMessage);
+        }
+
+        $this->mailbox = null;
+        $this->pop3Transport->disconnect();
     }
 
     /**
@@ -109,8 +165,10 @@ class MailAgent
      * @param string $body
      * @param string $from
      * @param string $to
+     *
+     * @return \ezcMail
      */
-    public function createAndSendTo($subject, $body, $from, $to)
+    public function createMessage($subject, $body, $from, $to)
     {
         $mail = new \ezcMailComposer();
         $mail->from = new \ezcMailAddress($from);
@@ -120,21 +178,25 @@ class MailAgent
         $mail->plainText = stripcslashes($body);
         $mail->build();
 
-        $transport = new \ezcMailSmtpTransport($this->mailServer);
-        $transport->send($mail);
-        $transport->disconnect();
+        return $mail;
     }
 
     /**
+     * @param \ezcMail $mail
      * @param string $text
+     *
+     * @return \ezcMail
      */
-    public function reply($text)
+    public function createReplyMessage($mail, $text)
     {
-        $replyMail = \ezcMailTools::replyToMail($this->mail, $this->mail->to[0]);
+        $replyMail = \ezcMailTools::replyToMail($mail, $mail->to[0]);
         $replyMail->body = new \ezcMailText($text, 'utf8', '8bit', 'utf8');
 
-        $transport = new \ezcMailSmtpTransport($this->mailServer);
-        $transport->send($replyMail);
-        $transport->disconnect();
+        return $replyMail;
+    }
+
+    public function addAttach($mail, $filepath)
+    {
+        return $mail;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Staffim\Behat\MailExtension\Context;
 
+use Staffim\Behat\MailExtension\MailAgent;
+
 /**
  * MailAgent aware interface for contexts.
  */

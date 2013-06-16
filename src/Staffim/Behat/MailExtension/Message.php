@@ -9,6 +9,14 @@ class Message
      */
     private $mail;
 
+    /**
+     * @return \ezcMail
+     */
+    public function getRawMail()
+    {
+        return $this->mail;
+    }
+
     public function __construct($mail)
     {
         $this->mail = $mail;
@@ -118,7 +126,7 @@ class Message
      */
     public function getPlainMessage()
     {
-        return explode('Content-Type: text/html', $this->mail->generate())[0];
+        return "Plain message:\n" . explode('Content-Type: text/html', $this->mail->generate())[0];
     }
 
     /**
@@ -174,5 +182,23 @@ class Message
                 return strpos($filename, stripcslashes($name)) !== false;
             }
         }
+    }
+
+    /**
+     * @throws \Exception If no matches found.
+     *
+     * @param $pattern
+     *
+     * @return string[]
+     */
+    public function findBodyMatches($pattern)
+    {
+        preg_match($pattern, $this->getBody(), $matches);
+        if (empty($matches)) {
+            // TODO Split message to short (default exception message) and detail description.
+            throw new \Exception(sprintf('Not matches for pattern "%s" in message body: %s', $pattern, $this->getBody()));
+        }
+
+        return $matches;
     }
 }

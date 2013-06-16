@@ -20,130 +20,20 @@ class MailContext extends RawMailContext
     }
 
     /**
-     * Выход с почтового сервера при сценарии с почтой
-     *
-     * @AfterScenario @mail
-     */
-    public function afterFailedMail(ScenarioEvent $event)
-    {
-        if ($this->hasMailbox()) {
-            $this->iSignOutMailServer();
-        };
-    }
-
-    /**
-     * Ответ на почту с тестирующего почтового сервера
-     * @When /^(?:|я )отправляю ответ с текстом "(?P<text>(?:[^"]|\\")*)"$/
-     */
-    public function iReplyWithMail($text)
-    {
-        return new Step\Given(sprintf('отправляю ответ с текстом "%s" на сервер "%s"',
-            $text, $this->parameters['mailServer']));
-    }
-
-    /**
-     * @When /^(?:|я )за(шел|хожу) на почтовый сервер$/
-     */
-    public function iResetMailbox()
-    {
-        return new Step\Given(sprintf('авторизуюсь на "%s" почтовом сервере с "%s" и "%s"',
-            $this->parameters['mailServer'],
-            $this->parameters['mailAuth']['login'], $this->parameters['mailAuth']['password']));
-    }
-
-    /**
-     * @When /^(?:|я )сбр(асываю|осил) почтовый сервер$/
-     */
-    public function iLoginMailbox()
-    {
-        return new Step\Given(sprintf('сбрасываю "%s" почтовый сервер с "%s" и "%s"',
-                $this->parameters['mailServer'],
-                $this->parameters['mailAuth']['login'], $this->parameters['mailAuth']['password'])
-        );
-    }
-
-    /**
-     * @var \Staffim\Behat\MailExtension\Message
-     */
-    private $mail;
-
-    /**
-     * @var \Staffim\Behat\MailExtension\Mailbox
-     */
-    private $mailbox;
-
-    /**
-     * @return \Staffim\Behat\MailExtension\Message
-     *
-     * @throws \Exception
-     */
-    // TODO To option.
-    private function getMail()
-    {
-        if (!$this->mail) {
-            throw new \Exception('Mail not open yet.');
-        }
-
-        return $this->mail;
-    }
-
-    /**
-     * @return \Staffim\Behat\MailExtension\Mailbox
-     *
-     * @throws \Exception
-     */
-    // TODO To option.
-    private function getMailbox()
-    {
-        if (!$this->mailbox) {
-            throw new \Exception('Mailbox not created');
-        }
-
-        return $this->mailbox;
-    }
-
-    /**
-     * @return \Staffim\Behat\MailExtension\Mailbox
-     */
-    public function hasMailbox()
-    {
-        return !$this->mailbox;
-    }
-
-    /**
-     * @When /^(?:|I )sign in to "(?P<mailServer>[^"]*)" mail server with "(?P<user>[^"]*)" and "(?P<password>[^"]*)"$/
-     * @When /^(?:|я )авториз(уюсь|овался) на "(?P<mailServer>[^"]*)" почтовом сервере с "(?P<user>[^"]*)" и "(?P<password>[^"]*)"$/
-     */
-    public function iSignInToMailServer($mailServer, $user, $password)
-    {
-        $this->mailbox = new Mailbox($mailServer, $user, $password);
-    }
-
-    /**
-     * @When /^(?:|I )sign out mail server$/
-     * @When /^(?:|я )выхожу с почтового сервера$/
-     */
-    // TODO "I sign out FROM mail server".
-    public function iSignOutMailServer()
-    {
-        if ($this->hasMailbox()) {
-            $this->getMailbox()->disconnect();
-            $this->mailbox = null;
-        }
-    }
-
-    /**
      * @Then /^(?:|I )should see (?P<count>\d+) new mail messag(e|es)$/
      * @Then /^(?:|я )должен видеть (?P<count>\d+) нов(ых|ое) пис(ем|ьма|ьмо)$/
      */
     public function iShouldSeeNewMailMessages($count)
     {
         $expectedCount = $count;
-        $count         = $this->getMailbox()->getMails()->count();
+        $count         = $this->getMailAgent()->getMailbox()->getMessages()->count();
 
         if ($count !== (int) $expectedCount) {
             // TODO Split message to short (default exception message) and detail description.
-            throw new \Exception("You have $count mail messages:\n" . $this->getMailbox()->getMailInfo());
+            throw new \Exception(
+                "There are $count mail messages, not $expectedCount\n"
+                    . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
+            );
         }
     }
 
@@ -153,9 +43,9 @@ class MailContext extends RawMailContext
      */
     public function iShouldSeeMailMessageWithTextInSubject($text)
     {
-        $this->getMailbox()
+        $this->getMailAgent()->getMailbox()
             ->findBySubject($text)
-            ->orThrow(new \Exception(sprintf('Mail with "%s" in subject not found.', $text)));
+            ->orThrow(new \Exception('Message with "' . $text . '" in subject not found.'));
     }
 
     /**
@@ -164,99 +54,9 @@ class MailContext extends RawMailContext
      */
     public function iShouldSeeMailMessageWithSubject($subject)
     {
-        $this->getMailbox()->findByEqualSubject($subject)->
-            orThrow(new \Exception(sprintf('Mail with "%s" subject not found.', $subject)));
-    }
-
-    /**
-     * @When /^(?:|I )delete mails from mailbox$/
-     * @When /^(?:|я )удал(яю|ил) письма из почтового ящика$/
-     *
-     * Below are deprecated.
-     *
-     * @When /^(?:|I )clean mailbox$/
-     * @When /^(?:|я )очи(щаю|стил) почтовый ящик$/
-     */
-    public function iDeleteMailFromMailbox()
-    {
-        $this->getMailbox()->deleteMail();
-    }
-
-    /**
-     * @Given /^(?:|I )vanishes "(?P<mailServer>[^"]*)" with "(?P<login>[^"]*)" and "(?P<password>[^"]*)"$/
-     * @Given /^(?:|я )(сбрасываю|сбросил) "(?P<mailServer>[^"]*)" (|почтовый сервер) с "(?P<login>[^"]*)" и "(?P<password>[^"]*)"$/
-     */
-    // TODO Remove — should be two steps (connect and delete) instead.
-    public function iCleanMailServer($mailServer, $login, $password)
-    {
-        Mailbox::resetMailbox($mailServer, $login, $password);
-    }
-
-    /**
-     * @When /^(?:|I )go to "(?P<subject>(?:[^"]|\\")*)" mail message$/
-     * @When /^(?:|я )открываю письмо "(?P<subject>(?:[^"]|\\")*)"$/
-     */
-    public function iGoToMailMessage($subject)
-    {
-        $this->mail = $this->getMailbox()
-            ->findBySubject($subject)
-            // TODO Split message to short (default exception message) and detail description.
-            ->orThrow(new \Exception("Mail with $subject in subject text not found.\nMessages:\n" . $this->getMailbox()->getMailInfo()));
-    }
-
-    /**
-     * @When /^(?:|I )go to recipient "(?P<address>(?:[^"]|\\")*)" mail message$/
-     * @When /^(?:|я )открываю письмо у получателя "(?P<address>(?:[^"]|\\")*)"$/
-     */
-    // TODO I go to mail message with "<address>" in recipients, Я открываю письмо, адресованное "<address>"
-    public function iGoToMailMessageByRecipientAddress($address)
-    {
-        $this->mail = $this->getMailbox()
-            ->findByRecipient($address)
-            // TODO Split message to short (default exception message) and detail description.
-            ->orThrow(new \Exception('Mail with "$address" in recipient addresses not found'."\nMessages:\n" . $this->getMailbox()->getMailInfo()));
-    }
-
-    /**
-     * @throws \Exception If no matches found.
-     *
-     * @param $pattern
-     *
-     * @return string[]
-     */
-    private function findBodyMatches($pattern)
-    {
-        $body = $this->getMail()->getBody();
-
-        preg_match($pattern, $body, $matches);
-        if (empty($matches)) {
-            // TODO Split message to short (default exception message) and detail description.
-            throw new \Exception(sprintf('Not matches for pattern "%s" in message body: %s', $pattern, $body));
-        }
-
-        return $matches;
-    }
-
-    /**
-     * @Then /^(?:|I )follow "(?P<linkPattern>(?:[^"]|\\")*)" from mail message$/
-     * @Then /^(?:|я )перехожу по ссылке "(?P<linkPattern>(?:[^"]|\\")*)" из письма$/
-     */
-    public function iFollowLinkInMailMessage($linkPattern)
-    {
-        $matches = $this->findBodyMatches($linkPattern);
-
-        return new Step\Given(sprintf('am on "%s"', $matches[2]));
-    }
-
-    /**
-     * @Then /^(?:|I )fill in "(?P<field>(?:[^"]|\\")*)" by pattern "(?P<pattern>(?:[^"]|\\")*)" from mail body$/
-     * @Then /^(?:|я )заполняю поле "(?P<field>(?:[^"]|\\")*)" по шаблону "(?P<pattern>(?:[^"]|\\")*)" из тела письма$/
-     */
-    public function iFillInFromMailValue($field, $pattern)
-    {
-        $matches = $this->findBodyMatches($pattern);
-
-        return new Step\Given(sprintf('fill in "%s" with "%s"', $field, $matches[1]));
+        $this->getMailAgent()->getMailbox()
+            ->findByEqualSubject($subject)
+            ->orThrow(new \Exception('Message with "' . $subject . '" subject not found.'));
     }
 
     /**
@@ -267,7 +67,7 @@ class MailContext extends RawMailContext
     {
         if (!$this->getMail()->findInBody($text)) {
             // TODO Split message to short (default exception message) and detail description.
-            throw new \Exception("Mail with \"$text\" in message body not found.\nPlain message:\n" . $this->getMail()->getPlainMessage());
+            throw new \Exception("Mail with \"$text\" in message body not found.\n" . $this->getMail()->getPlainMessage());
         }
     }
 
@@ -278,7 +78,7 @@ class MailContext extends RawMailContext
     public function iShouldSeeAsReplyAddress($text)
     {
         if (!$this->getMail()->findInFrom($text)) {
-            throw new \Exception("Mail with $text in address of message sender not found\nPlain message:\n" . $this->getMail()->getPlainMessage());
+            throw new \Exception("Mail with $text in address of message sender not found\n" . $this->getMail()->getPlainMessage());
         }
     }
 
@@ -294,20 +94,24 @@ class MailContext extends RawMailContext
     }
 
     /**
-     * @When /^(?:|I )reply with "(?P<text>(?:[^"]|\\")*)" to mail server "(?P<mailServer>(?:[^"]|\\")*)"$/
-     * @When /^(?:|я )отправляю ответ с текстом "(?P<text>(?:[^"]|\\")*)" на сервер "(?P<mailServer>(?:[^"]|\\")*)"$/
+     * @Then /^(?:|I )follow "(?P<linkPattern>(?:[^"]|\\")*)" from mail message$/
+     * @Then /^(?:|я )перехожу по ссылке "(?P<linkPattern>(?:[^"]|\\")*)" из письма$/
      */
-    public function iReplyWithToMailMessage($text, $mailServer)
+    public function iFollowLinkInMailMessage($linkPattern)
     {
-        $this->getMail()->reply($mailServer, $text);
+        $matches = $this->getMail()->findBodyMatches($linkPattern);
+
+        return new Step\Given(sprintf('am on "%s"', $matches[2]));
     }
 
     /**
-     * @When /^(?:|I )send mail to server "(?P<mailServer>(?:[^"]|\\")*)" with subject "(?P<subject>(?:[^"]|\\")*)" and body "(?P<body>(?:[^"]|\\")*)" to address "(?P<to>(?:[^"]|\\")*)" from "(?P<from>(?:[^"]|\\")*)"$/
-     * @When /^(?:|я )отправляю письмо серверу "(?P<mailServer>(?:[^"]|\\")*)" с темой "(?P<subject>(?:[^"]|\\")*)" и текстом "(?P<body>(?:[^"]|\\")*)" по адресу "(?P<to>(?:[^"]|\\")*)" от "(?P<from>(?:[^"]|\\")*)"$/
+     * @Then /^(?:|I )fill in "(?P<field>(?:[^"]|\\")*)" by pattern "(?P<pattern>(?:[^"]|\\")*)" from mail body$/
+     * @Then /^(?:|я )заполняю поле "(?P<field>(?:[^"]|\\")*)" по шаблону "(?P<pattern>(?:[^"]|\\")*)" из тела письма$/
      */
-    public function iSendMail($mailServer, $subject, $body, $to, $from)
+    public function iFillInFromMailValue($field, $pattern)
     {
-        Message::createAndSendTo($mailServer, $subject, $body, $to, $from);
+        $matches = $this->getMail()->findBodyMatches($pattern);
+
+        return new Step\Given(sprintf('fill in "%s" with "%s"', $field, $matches[1]));
     }
 }

@@ -42,13 +42,13 @@ class Mailbox
      * @return string
      */
     // TODO WTF?! Rename to more informative name.
-    public function getMailInfo()
+    public function getMailFromToSubject()
     {
         if ($this->getMessages()->isEmpty()) {
             return 'Mailbox is empty';
         }
 
-        return $this->mails->mapBy(function(Message $mail) {
+        return "Messages: \n" . $this->mails->mapBy(function(Message $mail) {
             return $mail->serializeAddressHeaders();
         })->join("\n");
     }
