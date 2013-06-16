@@ -68,6 +68,16 @@ class RawMailContext extends BehatContext implements MailAwareInterface
         return $this->mail;
     }
 
+    /**
+     * Return parameters provided for MailAgent.
+     *
+     * @return array $parameters
+     */
+    public function getMailAgentParameters()
+    {
+        return $this->mailAgentParameters;
+    }
+
 //     /**
 //     * Выход с почтового сервера при сценарии с почтой
 //     *
@@ -94,13 +104,16 @@ class RawMailContext extends BehatContext implements MailAwareInterface
      */
     public function iSignOutFromMailServer()
     {
-//        $this->getMailAgent()->disconnect();
+        $this->getMailAgent()->disconnect();
     }
 
     /**
-     * @When /^(?:|I )clean mailbox$/
+     * Depricated
      * @When /^(?:|я )очи(щаю|стил) почтовый ящик$/
      * @When /^(?:|я )сбросил почтовый сервер$/
+     *
+     * @When /^(?:|I )clean mailbox$/
+     * @When /^(?:|я )удал(яю|ил) письма с почтового ящика$/
      */
     public function iDeleteMailMessages()
     {
@@ -153,6 +166,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface
 
     /**
      * @When /^(?:|я )за(шел|хожу) на почтовый сервер$/
+     * @When /^(?:|я )получ(ил|аю) почту$/
      */
     public function iReceiveMailMessages()
     {

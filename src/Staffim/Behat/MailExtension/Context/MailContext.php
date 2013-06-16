@@ -7,17 +7,17 @@ use Behat\Behat\Context\Step;
 class MailContext extends RawMailContext
 {
 
-    /**
-     * Initializes context.
-     * Every scenario gets it's own context object.
-     *
-     * @param array $parameters context parameters (set them up through behat.yml)
-     */
-    public function __construct(array $parameters)
-    {
-        // Initialize your context here
-        $this->context = $parameters;
-    }
+//    /**
+//     * Initializes context.
+//     * Every scenario gets it's own context object.
+//     *
+//     * @param array $parameters context parameters (set them up through behat.yml)
+//     */
+//    public function __construct(array $parameters)
+//    {
+//        // Initialize your context here
+//        $this->context = $parameters;
+//    }
 
     /**
      * @Then /^(?:|I )should see (?P<count>\d+) new mail messag(e|es)$/
@@ -113,5 +113,26 @@ class MailContext extends RawMailContext
         $matches = $this->getMail()->findBodyMatches($pattern);
 
         return new Step\Given(sprintf('fill in "%s" with "%s"', $field, $matches[1]));
+    }
+
+    /**
+     * @Given /^(?:|я )должен видеть в адресе письма "([^"]*)"$/
+     */
+    public function iShouldSeeServerAddressInMailAddress($arg1)
+    {
+        return array(
+            new Step\When(sprintf('должен видеть "%s" в адресе отправителя письма', $this->getMailAgentParameters()["baseAddress"])),
+            new Step\When(sprintf('должен видеть "%s" в адресе отправителя письма', $arg1))
+        );
+    }
+
+    /**
+     * @Given /^(?:|я )должен видеть в письме время часового пояса "([^"]*)" через (\d+) (?:дней|дня|день)$/
+     */
+    public function iShouldSeeCurrentHourInMail($arg1, $arg2)
+    {
+        $date = (new \DateTime($arg1))->modify("+$arg2 days")->format('d.m.Y H:');
+
+        return new Step\When(sprintf('должен видеть "%s" в письме', $date));
     }
 }

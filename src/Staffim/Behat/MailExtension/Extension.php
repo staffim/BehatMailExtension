@@ -20,7 +20,6 @@ class Extension extends \Behat\Behat\Extension\Extension implements ExtensionInt
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__));
         $loader->load('ExtensionServices.yml');
 
-//        var_dump($config);
         foreach ($config as $ns => $tlValue) {
             if (!is_array($tlValue)) {
                 $container->setParameter("behat.mail_extension.$ns", $tlValue);
@@ -31,12 +30,6 @@ class Extension extends \Behat\Behat\Extension\Extension implements ExtensionInt
             }
         }
         $container->setParameter('behat.mail_extension.parameters', $config);
-
-
-
-//        $container->setParameter('behat.mail_extension.pop3_server', $config['pop3Server']);
-//        $container->setParameter('behat.mail_extension.address', $config['baseAddress']);
-//        $container->setParameter('behat.mail_extension.pop3_auth', $config['pop3Auth']);
     }
 
     /**
@@ -65,7 +58,7 @@ class Extension extends \Behat\Behat\Extension\Extension implements ExtensionInt
                 arrayNode('smtpAuth')->
                     children()->
                         scalarNode('login')->
-                            defaultValue(isset($config['smtpAuth']['login']) ? $config['smtpAuth']['login'] : 'anonimous')->
+                            defaultValue(isset($config['smtpAuth']['login']) ? $config['smtpAuth']['login'] : '')->
                         end()->
                         scalarNode('password')->
                             defaultValue(isset($config['smtpAuth']['password']) ? $config['smtpAuth']['password'] : '')->

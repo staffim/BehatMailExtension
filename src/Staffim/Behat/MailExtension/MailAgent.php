@@ -26,43 +26,98 @@ class MailAgent implements MailAgentInterface
      */
     private $mailbox;
 
-    public function __construct(AccountInterface $pop3Account, AccountInterface $smtpAccount=null)
+    /**
+     * @var Account
+     */
+    private $pop3Account;
+
+    /**
+     * @param Account $pop3Account
+     */
+    public function setPop3Account($pop3Account)
     {
+        $this->pop3Account = $pop3Account;
+    }
+
+    /**
+     * @var Account
+     */
+    private $smtpAccount;
+
+    /**
+     * @param Account $smtpAccount
+     */
+    public function setSmtpAccount($smtpAccount)
+    {
+        $this->smtpAccount = $smtpAccount;
+    }
+
+    /**
+* @param AccountInterface $pop3Account
+* @param AccountInterface $smtpAccount
+     */
+    public function __construct(AccountInterface $pop3Account, AccountInterface $smtpAccount = null)
+    {
+        $this->pop3Account = $pop3Account;
+
         $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
-        $this->pop3Transport->authenticate($pop3Account->getUser(), $pop3Account->getPassword());
 
         $this->mailParser = new \ezcMailParser();
 
         if ($smtpAccount) {
-            $this->connectSmtpServer($smtpAccount);
+            $this->smtpAccount = $smtpAccount;
         }
     }
 
-    public function connectSmtpServer(AccountInterface $smtpAccount)
+    /**
+     * @param AccountInterface $smtpAccount
+     */
+    public function connectSmtpServer(AccountInterface $smtpAccount = null)
+    {
+        $this->disconnectSmtp();
+
+        $smtpAccount = $smtpAccount ? $smtpAccount: $this->smtpAccount;
+        $this->smtpTransport = new \ezcMailSmtpTransport($smtpAccount->getServerName(), $smtpAccount->getUser(), $smtpAccount->getPassword());
+    }
+
+    /**
+     * @param AccountInterface $pop3Account
+     */
+    public function connectPop3Server(AccountInterface $pop3Account = null)
+    {
+        $this->disconnectPop3();
+
+        $pop3Account = $pop3Account ? $pop3Account: $this->pop3Account;
+        $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
+        $this->pop3Transport->authenticate($pop3Account->getUser(), $pop3Account->getPassword());
+    }
+
+    public function disconnectSmtp()
     {
         try {
-            if (!!$this->smtpTransport) {
+            if ($this->smtpTransport) {
                 $this->smtpTransport->disconnect();
             }
         } catch (\ezcMailTransportException $e) {
             // Ignore transport exceptions.
         }
-
-        $this->smtpTransport = new \ezcMailSmtpTransport($smtpAccount->getServerName(), $smtpAccount->getUser(), $smtpAccount->getPassword());
     }
 
-    public function connectPop3Server(AccountInterface $pop3Account)
+    public function disconnectPop3()
     {
         try {
-            if (!!$this->pop3Transport) {
+            if ($this->pop3Transport) {
                 $this->pop3Transport->disconnect();
             }
         } catch (\ezcMailTransportException $e) {
             // Ignore transport exceptions.
         }
+    }
 
-        $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
-        $this->pop3Transport->authenticate($pop3Account->getUser(), $pop3Account->getPassword());
+    public function disconnect()
+    {
+        $this->disconnectPop3();
+        $this->disconnectSmtp();
     }
 
     public function __destruct()
@@ -70,34 +125,31 @@ class MailAgent implements MailAgentInterface
         $this->disconnect();
     }
 
-    public function disconnect()
-    {
-        try {
-            $this->pop3Transport->disconnect();
-            $this->smtpTransport->disconnect();
-        } catch (\ezcMailTransportException $e) {
-             // Ignore transport exceptions.
-        }
-    }
-
+    /**
+     * @return \ezcMailSmtpTransport
+     *
+     * @throws \Exception
+     */
+    // TODO To option.
     public function getSmtpTransport()
     {
-        if (!!$this->smtpTransport) {
-
-            return $this->smtpTransport;
-        }
+        return $this->smtpTransport;
     }
-
 
     public function size()
     {
+        $this->connectPop3Server();
         $this->pop3Transport->status($dummy, $sizeMail);
 
         return $sizeMail;
     }
 
+    /**
+     * @return mixed
+     */
     public function number()
     {
+        $this->connectPop3Server();
         $this->pop3Transport->status($numMail, $dummy);
 
         return $numMail;
@@ -113,10 +165,7 @@ class MailAgent implements MailAgentInterface
 
     /**
      * @return Mailbox
-     *
-     * @throws \Exception
      */
-    // TODO To option.
     public function getMailbox()
     {
         if (!$this->mailbox) {
@@ -131,7 +180,8 @@ class MailAgent implements MailAgentInterface
      */
     public function receive()
     {
-        var_dump("Receive", $this->number());
+        $this->connectPop3Server();
+
         $mails = $this->pop3Transport->fetchAll();
         $mails = $this->mailParser->parseMail($mails);
 
@@ -143,6 +193,7 @@ class MailAgent implements MailAgentInterface
      */
     public function send($mail)
     {
+        $this->connectSmtpServer();
         $this->smtpTransport->send($mail);
     }
 
@@ -151,6 +202,7 @@ class MailAgent implements MailAgentInterface
      */
     public function removeMessages()
     {
+        $this->connectPop3Server();
         $count = $this->number();
         for ($numMessage = 1; $numMessage <= $count; $numMessage++) {
             $this->pop3Transport->delete($numMessage);
@@ -195,6 +247,7 @@ class MailAgent implements MailAgentInterface
         return $replyMail;
     }
 
+//    TODO
     public function addAttach($mail, $filepath)
     {
         return $mail;
