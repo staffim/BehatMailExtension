@@ -218,10 +218,11 @@ class MailAgent implements MailAgentInterface
      * @param string $body
      * @param string $from
      * @param string $to
+     * @param array $attaches
      *
      * @return \ezcMail
      */
-    public function createMessage($subject, $body, $from, $to)
+    public function createMessage($subject, $body, $from, $to, $attaches = [])
     {
         $mail = new \ezcMailComposer();
         $mail->from = new \ezcMailAddress($from);
@@ -229,6 +230,13 @@ class MailAgent implements MailAgentInterface
         $mail->headers->offsetSet('Reply-To', $from);
         $mail->subject = stripcslashes($subject);
         $mail->plainText = stripcslashes($body);
+
+        if ($attaches) {
+            foreach ($attaches as $attach) {
+                $mail->addFileAttachment($attach);
+            }
+        }
+
         $mail->build();
 
         return $mail;
@@ -246,11 +254,5 @@ class MailAgent implements MailAgentInterface
         $replyMail->body = new \ezcMailText($text, 'utf8', '8bit', 'utf8');
 
         return $replyMail;
-    }
-
-//    TODO
-    public function addAttach($mail, $filepath)
-    {
-        return $mail;
     }
 }
