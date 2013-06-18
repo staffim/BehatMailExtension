@@ -16,8 +16,8 @@ class MailAwareInitializer implements InitializerInterface
 
     public function __construct(array $parameters)
     {
-        $pop3Account = new Account($parameters['pop3Server'], $parameters['pop3Auth']);
-        $smtpAccount = new Account($parameters['smtpServer'], $parameters['smtpAuth']);
+        $pop3Account = new Account($parameters['pop3Server'], $parameters['pop3Auth']['login'], $parameters['pop3Auth']['password']);
+        $smtpAccount = new Account($parameters['smtpServer'], $parameters['smtpAuth']['login'], $parameters['smtpAuth']['password']);
         $this->mailAgent = new MailAgent($pop3Account, $smtpAccount);
         $this->parameters = $parameters;
     }

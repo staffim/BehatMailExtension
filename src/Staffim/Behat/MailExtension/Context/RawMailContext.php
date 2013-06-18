@@ -88,12 +88,12 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
 //    }
 
     /**
-     * @When /^(?:|I )sign in to "(?P<mailServer>[^"]*)" smtp server with "(?P<user>[^"]*)" and "(?P<password>[^"]*)"$/
-//     * @When /^(?:|я )авториз(уюсь|овался) на "(?P<mailServer>[^"]*)" почтовом smtp сервере с "(?P<user>[^"]*)" и "(?P<password>[^"]*)"$/
+     * @When /^(?:|I )sign in to "(?P<mailServer>[^"]*)" smtp server with "(?P<login>[^"]*)" and "(?P<password>[^"]*)"$/
+//     * @When /^(?:|я )авториз(уюсь|овался) на "(?P<mailServer>[^"]*)" почтовом smtp сервере с "(?P<login>[^"]*)" и "(?P<password>[^"]*)"$/
      */
-    public function iSignInToSmtpServer($mailServer, $user, $password)
+    public function iSignInToSmtpServer($mailServer, $login, $password)
     {
-        $smtpAccount = new Account($mailServer, ['login' => $user, 'password' => $password]);
+        $smtpAccount = new Account($mailServer, $login, $password);
         $this->getMailAgent()->connectSmtpServer($smtpAccount);
     }
 

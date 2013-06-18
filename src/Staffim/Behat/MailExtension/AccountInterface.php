@@ -7,7 +7,7 @@ interface AccountInterface
     /**
      * @return string
      */
-    public function getUser();
+    public function getLogin();
 
     /**
      * @return string

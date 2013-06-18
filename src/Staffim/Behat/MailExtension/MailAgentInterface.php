@@ -13,6 +13,8 @@ interface MailAgentInterface
 
     /**
      * Receive messages to mailbox
+     *
+     * @return Mailbox
      */
     public function receive();
 

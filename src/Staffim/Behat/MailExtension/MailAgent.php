@@ -53,20 +53,16 @@ class MailAgent implements MailAgentInterface
     }
 
     /**
-* @param AccountInterface $pop3Account
-* @param AccountInterface $smtpAccount
+     * @param AccountInterface $pop3Account
+     * @param AccountInterface $smtpAccount
      */
     public function __construct(AccountInterface $pop3Account, AccountInterface $smtpAccount = null)
     {
         $this->pop3Account = $pop3Account;
+        $this->smtpAccount = $smtpAccount;
 
         $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
-
         $this->mailParser = new \ezcMailParser();
-
-        if ($smtpAccount) {
-            $this->smtpAccount = $smtpAccount;
-        }
     }
 
     /**
@@ -77,7 +73,7 @@ class MailAgent implements MailAgentInterface
         $this->disconnectSmtp();
 
         $smtpAccount = $smtpAccount ? $smtpAccount: $this->smtpAccount;
-        $this->smtpTransport = new \ezcMailSmtpTransport($smtpAccount->getServerName(), $smtpAccount->getUser(), $smtpAccount->getPassword());
+        $this->smtpTransport = new \ezcMailSmtpTransport($smtpAccount->getServerName(), $smtpAccount->getLogin(), $smtpAccount->getPassword());
     }
 
     /**
@@ -89,7 +85,7 @@ class MailAgent implements MailAgentInterface
 
         $pop3Account = $pop3Account ? $pop3Account: $this->pop3Account;
         $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
-        $this->pop3Transport->authenticate($pop3Account->getUser(), $pop3Account->getPassword());
+        $this->pop3Transport->authenticate($pop3Account->getLogin(), $pop3Account->getPassword());
     }
 
     public function disconnectSmtp()
@@ -177,6 +173,8 @@ class MailAgent implements MailAgentInterface
 
     /**
      * Receive messages to mailbox
+     *
+     * @return Mailbox
      */
     public function receive()
     {
@@ -185,7 +183,10 @@ class MailAgent implements MailAgentInterface
         $mails = $this->pop3Transport->fetchAll();
         $mails = $this->mailParser->parseMail($mails);
 
-        $this->setMailbox(new Mailbox($mails));
+        $mailbox = new Mailbox($mails);
+        $this->setMailbox($mailbox);
+
+        return $mailbox;
     }
 
     /**

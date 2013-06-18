@@ -12,7 +12,7 @@ class Account implements AccountInterface
     /**
      * @var string
      */
-    private $user;
+    private $login;
 
     /**
      * @var string
@@ -21,21 +21,22 @@ class Account implements AccountInterface
 
     /**
      * @param $server string server name
-     * @param $auth array of ['login': login, 'password': password]
+     * @param string $login
+     * @param string $password
      */
-    public function __construct($server, $auth=['login' => '', 'password' => ''])
+    public function __construct($server, $login = '', $password = '')
     {
         $this->server = $server;
-        $this->user = $auth['login'];
-        $this->password = $auth['password'];
+        $this->login = $login;
+        $this->password = $password;
     }
 
     /**
      * @return string
      */
-    public function getUser()
+    public function getLogin()
     {
-        return $this->user;
+        return $this->login;
     }
 
     /**
