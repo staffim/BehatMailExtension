@@ -6,22 +6,8 @@ use Behat\Behat\Context\Step;
 
 class MailContext extends RawMailContext
 {
-
-//    /**
-//     * Initializes context.
-//     * Every scenario gets it's own context object.
-//     *
-//     * @param array $parameters context parameters (set them up through behat.yml)
-//     */
-//    public function __construct(array $parameters)
-//    {
-//        // Initialize your context here
-//        $this->context = $parameters;
-//    }
-
     /**
      * @Then /^(?:|I )should see (?P<count>\d+) new mail messag(e|es)$/
-     * @Then /^(?:|я )должен видеть (?P<count>\d+) нов(ых|ое) пис(ем|ьма|ьмо)$/
      */
     public function iShouldSeeNewMailMessages($count)
     {
@@ -39,7 +25,6 @@ class MailContext extends RawMailContext
 
     /**
      * @Then /^(?:|I )should see mail message with "(?P<text>(?:[^"]|\\")*)" in subject$/
-     * @Then /^(?:|я )должен видеть письмо с "(?P<text>(?:[^"]|\\")*)" в теме$/
      */
     public function iShouldSeeMailMessageWithTextInSubject($text)
     {
@@ -50,7 +35,6 @@ class MailContext extends RawMailContext
 
     /**
      * @Then /^(?:|I )should see mail message with subject "(?P<subject>(?:[^"]|\\")*)"$/
-     * @Then /^(?:|я )должен видеть письмо с темой "(?P<subject>(?:[^"]|\\")*)"$/
      */
     public function iShouldSeeMailMessageWithSubject($subject)
     {
@@ -61,7 +45,6 @@ class MailContext extends RawMailContext
 
     /**
      * @Then /^(?:|I )should see "(?P<text>(?:[^"]|\\")*)" in mail message$/
-     * @Then /^(?:|я )должен видеть "(?P<text>(?:[^"]|\\")*)" в письме$/
      */
     public function iShouldSeeInMailMessage($text)
     {
@@ -73,7 +56,6 @@ class MailContext extends RawMailContext
 
     /**
      * @Then /^(?:|I )should see "(?P<text>(?:[^"]|\\")*)" as reply address in mail message$/
-     * @Then /^(?:|я )должен видеть "(?P<text>(?:[^"]|\\")*)" в адресе отправителя письма$/
      */
     public function iShouldSeeAsReplyAddress($text)
     {
@@ -84,7 +66,6 @@ class MailContext extends RawMailContext
 
     /**
      * @Then /^(?:|I )should see attachment "(?P<text>(?:[^"]|\\")*)" in mail message$/
-     * @Then /^(?:|я )должен видеть прикрепленный к письму файл "(?P<text>(?:[^"]|\\")*)"$/
      */
     public function iShouldSeeAttachment($text)
     {
@@ -95,7 +76,6 @@ class MailContext extends RawMailContext
 
     /**
      * @Then /^(?:|I )follow "(?P<linkPattern>(?:[^"]|\\")*)" from mail message$/
-     * @Then /^(?:|я )перехожу по ссылке "(?P<linkPattern>(?:[^"]|\\")*)" из письма$/
      */
     public function iFollowLinkInMailMessage($linkPattern)
     {
@@ -106,7 +86,6 @@ class MailContext extends RawMailContext
 
     /**
      * @Then /^(?:|I )fill in "(?P<field>(?:[^"]|\\")*)" by pattern "(?P<pattern>(?:[^"]|\\")*)" from mail body$/
-     * @Then /^(?:|я )заполняю поле "(?P<field>(?:[^"]|\\")*)" по шаблону "(?P<pattern>(?:[^"]|\\")*)" из тела письма$/
      */
     public function iFillInFromMailValue($field, $pattern)
     {
@@ -116,13 +95,14 @@ class MailContext extends RawMailContext
     }
 
     /**
-     * @Given /^(?:|я )должен видеть в адресе письма "([^"]*)"$/
+     * @Then /^(?:|I )should see "([^"]*)" base sender address$/
+     * @Then /^(?:|я )должен видеть в адресе письма "([^"]*)"$/
      */
-    public function iShouldSeeServerAddressInMailAddress($arg1)
+    public function iShouldSeeServerAddressInFrom($arg1)
     {
         return array(
-            new Step\When(sprintf('должен видеть "%s" в адресе отправителя письма', $this->getMailAgentParameters()["baseAddress"])),
-            new Step\When(sprintf('должен видеть "%s" в адресе отправителя письма', $arg1))
+            new Step\When(sprintf('should see "%s" as reply address in mail message$/', $this->getMailAgentParameters()["baseAddress"])),
+            new Step\When(sprintf('should see "%s" as reply address in mail message$/', $arg1))
         );
     }
 
@@ -133,6 +113,6 @@ class MailContext extends RawMailContext
     {
         $date = (new \DateTime($arg1))->modify("+$arg2 days")->format('d.m.Y H:');
 
-        return new Step\When(sprintf('должен видеть "%s" в письме', $date));
+        return new Step\When(sprintf('should see "%s" in mail message', $date));
     }
 }

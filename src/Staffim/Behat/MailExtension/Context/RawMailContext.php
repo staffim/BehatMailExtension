@@ -77,19 +77,8 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
         return $this->mailAgentParameters;
     }
 
-//     /**
-//     * Выход с почтового сервера при сценарии с почтой
-//     *
-//     * @AfterScenario @mail
-//     */
-//    public function afterMailScenario()
-//    {
-//        $this->getMailAgent()->disconnect();
-//    }
-
     /**
      * @When /^(?:|I )sign in to "(?P<mailServer>[^"]*)" smtp server with "(?P<login>[^"]*)" and "(?P<password>[^"]*)"$/
-//     * @When /^(?:|я )авториз(уюсь|овался) на "(?P<mailServer>[^"]*)" почтовом smtp сервере с "(?P<login>[^"]*)" и "(?P<password>[^"]*)"$/
      */
     public function iSignInToSmtpServer($mailServer, $login, $password)
     {
@@ -99,7 +88,6 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
 
     /**
      * @When /^(?:|I )sign out from mail server$/
-//     * @When /^(?:|я )выхожу с почтового сервера$/
      */
     public function iSignOutFromMailServer()
     {
@@ -107,12 +95,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
     }
 
     /**
-//     * Depricated
-//     * @When /^(?:|я )очи(щаю|стил) почтовый ящик$/
-//     * @When /^(?:|я )сбросил почтовый сервер$/
-     *
      * @When /^(?:|I )remove mail messages$/
-//     * @When /^(?:|я )удал(яю|ил) письма с почтового ящика$/
      */
     public function iRemoveMailMessages()
     {
@@ -121,7 +104,6 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
 
     /**
      * @When /^(?:|I )reply with "(?P<text>(?:[^"]|\\")*)"$/
-//     * @When /^(?:|я )отправляю ответ с текстом "(?P<text>(?:[^"]|\\")*)"$/
      */
     public function iReplyWithMessage($text)
     {
@@ -131,7 +113,6 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
 
     /**
      * @When /^(?:|I )send mail with subject "(?P<subject>(?:[^"]|\\")*)" and body "(?P<body>(?:[^"]|\\")*)" to address "(?P<to>(?:[^"]|\\")*)" from "(?P<from>(?:[^"]|\\")*)"$/
-//     * @When /^(?:|я )отправляю письмо с темой "(?P<subject>(?:[^"]|\\")*)" и текстом "(?P<body>(?:[^"]|\\")*)" по адресу "(?P<to>(?:[^"]|\\")*)" от "(?P<from>(?:[^"]|\\")*)"$/
      */
     public function iSendMail($subject, $body, $to, $from)
     {
@@ -141,7 +122,6 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
 
     /**
      * @When /^(?:|I )go to "(?P<subject>(?:[^"]|\\")*)" mail message$/
-//     * @When /^(?:|я )открываю письмо "(?P<subject>(?:[^"]|\\")*)"$/
      */
     public function iGoToMailMessage($subject)
     {
@@ -153,7 +133,6 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
 
     /**
      * @When /^(?:|I )go to mail message with "(?P<address>(?:[^"]|\\")*)" in recipients$/
-//     * @When /^(?:|я )открываю письмо, адресованное "(?P<address>(?:[^"]|\\")*)"$/
      */
     public function iGoToMailMessageWithInRecipients($address)
     {
@@ -165,8 +144,6 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
 
     /**
      * @When /^(?:|I )receive mail messages$/
-//     * @When /^(?:|я )за(шел|хожу) на почтовый сервер$/
-//     * @When /^(?:|я )получ(ил|аю) почту$/
      */
     public function iReceiveMailMessages()
     {
