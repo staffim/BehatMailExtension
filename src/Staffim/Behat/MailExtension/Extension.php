@@ -2,14 +2,16 @@
 
 namespace Staffim\Behat\MailExtension;
 
+use Behat\Behat\Console\BehatApplication;
 use Behat\Behat\Extension\ExtensionInterface;
+use Behat\Behat\Extension\Extension as BehatExtension;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class Extension extends \Behat\Behat\Extension\Extension implements ExtensionInterface
+class Extension extends BehatExtension implements ExtensionInterface
 {
     /**
      * @param array                                                   $config
@@ -20,12 +22,16 @@ class Extension extends \Behat\Behat\Extension\Extension implements ExtensionInt
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__));
         $loader->load('ExtensionServices.yml');
 
-        foreach ($config as $ns => $tlValue) {
-            if (!is_array($tlValue)) {
-                $container->setParameter("behat.mail_extension.$ns", $tlValue);
+        if (!isset($config['smtpServer'])) {
+            $config['smtpServer'] = $config['pop3Server'];
+        }
+
+        foreach ($config as $complexName => $complexValue) {
+            if (!is_array($complexValue)) {
+                $container->setParameter("behat.mail_extension.$complexName", $complexValue);
             } else {
-                foreach ($tlValue as $name => $value) {
-                    $container->setParameter("behat.mail_extension.$ns.$name", $value);
+                foreach ($complexValue as $name => $value) {
+                    $container->setParameter("behat.mail_extension.$complexName.$name", $value);
                 }
             }
         }
@@ -53,7 +59,7 @@ class Extension extends \Behat\Behat\Extension\Extension implements ExtensionInt
                     end()->
                 end()->
                 scalarNode('smtpServer')->
-                    defaultValue(isset($config['smtpServer']) ? $config['smtpServer'] : 'localhost')->
+                    defaultValue(isset($config['smtpServer']) ? $config['smtpServer'] : null)->
                 end()->
                 arrayNode('smtpAuth')->
                     children()->
@@ -66,7 +72,7 @@ class Extension extends \Behat\Behat\Extension\Extension implements ExtensionInt
                     end()->
                 end()->
                 scalarNode('baseAddress')->
-                    defaultValue(isset($config['baseAddress']) ? $config['baseAddress'] : '')->
+                    defaultValue(isset($config['baseAddress']) ? $config['baseAddress'] : null)->
                 end()->
             end()->
         end();
