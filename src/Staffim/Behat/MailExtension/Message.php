@@ -126,7 +126,24 @@ class Message
      */
     public function getPlainMessage()
     {
-        return "Plain message:\n" . explode('Content-Type: text/html', $this->mail->generate())[0];
+        $plainMessage = explode('Content-Type: text/html;', $this->mail->generate())[0];
+
+        return $plainMessage;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHtmlMessage()
+    {
+        $htmlMessage = 'No HTML version';
+
+        $mailParts = explode('Content-Type: text/html; charset=utf-8', $this->mail->generate());
+        if (count($mailParts) > 1) {
+            $htmlMessage = [1];
+        }
+
+        return $htmlMessage;
     }
 
     /**
