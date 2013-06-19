@@ -34,9 +34,13 @@
             <source><![CDATA[/^(?:|I )receive mail messages$/]]></source>
             <target><![CDATA[/^(?:|я )за(шел|хожу) на почтовый сервер$/]]></target>
         </trans-unit>
-        <trans-unit id="iShouldSeeNewMailMessages">
-            <source><![CDATA[/^(?:|I )should see (?P<count>\d+) new mail messag(e|es)$/]]></source>
+        <trans-unit id="iShouldSeeNewMailMessagesAfterWaiting">
+            <source><![CDATA[/^(?:|I )should see (?P<count>\d+) new mail messag(e|es) after waiting$/]]></source>
             <target><![CDATA[/^(?:|я )должен видеть (?P<count>\d+) нов(ых|ое) пис(ем|ьма|ьмо)$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeMailMessages">
+            <source><![CDATA[/^(?:|I )should see (?P<count>\d+) messag(e|es)$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть (?P<count>\d+) пис(ем|ьма|ьмо)$/]]></target>
         </trans-unit>
         <trans-unit id="iShouldSeeMailMessageWithTextInSubject">
             <source><![CDATA[/^(?:|I )should see mail message with "(?P<text>(?:[^"]|\\")*)" in subject$/]]></source>
