@@ -1,0 +1,75 @@
+ <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file original="global" source-language="en" target-language="ru" datatype="plaintext">
+    <header />
+    <body>
+        <trans-unit id="iSignInToSmtpServer">
+            <source><![CDATA[/^(?:|I )sign in to "(?P<mailServer>[^"]*)" smtp server with "(?P<user>[^"]*)" and "(?P<password>[^"]*)"$/]]></source>
+            <target><![CDATA[/^(?:|я )авториз(уюсь|овался) на "(?P<mailServer>[^"]*)" почтовом smtp сервере с "(?P<user>[^"]*)" и "(?P<password>[^"]*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iSignOutFromMailServer">
+            <source><![CDATA[/^(?:|I )sign out from mail server$/]]></source>
+            <target><![CDATA[/^(?:|я )выхожу с почтового сервера$/]]></target>
+        </trans-unit>
+        <trans-unit id="iRemoveMailMessages">
+            <source><![CDATA[/^(?:|I )remove mail messages$/]]></source>
+            <target><![CDATA[/^(?:|я )удал(яю|ил) письма с почтового ящика$/]]></target>
+        </trans-unit>
+        <trans-unit id="iReplyWithMessage">
+            <source><![CDATA[/^(?:|I )reply with "(?P<text>(?:[^"]|\\")*)"$/]]></source>
+            <target><![CDATA[/^(?:|я )отправляю ответ с текстом "(?P<text>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iSendMail">
+            <source><![CDATA[/^(?:|I )send mail with subject "(?P<subject>(?:[^"]|\\")*)" and body "(?P<body>(?:[^"]|\\")*)" to address "(?P<to>(?:[^"]|\\")*)" from "(?P<from>(?:[^"]|\\")*)"$/]]></source>
+            <target><![CDATA[/^(?:|я )отправляю письмо с темой "(?P<subject>(?:[^"]|\\")*)" и текстом "(?P<body>(?:[^"]|\\")*)" по адресу "(?P<to>(?:[^"]|\\")*)" от "(?P<from>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iGoToMailMessag">
+            <source><![CDATA[/^(?:|I )go to "(?P<subject>(?:[^"]|\\")*)" mail message$/]]></source>
+            <target><![CDATA[/^(?:|я )открываю письмо "(?P<subject>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iGoToMailMessageWithInRecipients">
+            <source><![CDATA[/^(?:|I )go to mail message with "(?P<address>(?:[^"]|\\")*)" in recipients$/]]></source>
+            <target><![CDATA[/^(?:|я )открываю письмо, адресованное "(?P<address>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iReceiveMailMessages">
+            <source><![CDATA[/^(?:|I )receive mail messages$/]]></source>
+            <target><![CDATA[/^(?:|я )за(шел|хожу) на почтовый сервер$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeNewMailMessagesAfterWaiting">
+            <source><![CDATA[/^(?:|I )should see (?P<count>\d+) new mail messag(e|es) after waiting$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть (?P<count>\d+) нов(ых|ое) пис(ем|ьма|ьмо)$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeMailMessages">
+            <source><![CDATA[/^(?:|I )should see (?P<count>\d+) messag(e|es)$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть (?P<count>\d+) пис(ем|ьма|ьмо)$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeMailMessageWithTextInSubject">
+            <source><![CDATA[/^(?:|I )should see mail message with "(?P<text>(?:[^"]|\\")*)" in subject$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть письмо с "(?P<text>(?:[^"]|\\")*)" в теме$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeMailMessageWithSubject">
+            <source><![CDATA[/^(?:|I )should see mail message with subject "(?P<subject>(?:[^"]|\\")*)"$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть письмо с темой "(?P<subject>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeInMailMessage">
+            <source><![CDATA[/^(?:|I )should see "(?P<text>(?:[^"]|\\")*)" in mail message$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть "(?P<text>(?:[^"]|\\")*)" в письме$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeAsReplyAddress">
+            <source><![CDATA[/^(?:|I )should see "(?P<text>(?:[^"]|\\")*)" as reply address in mail message$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть "(?P<text>(?:[^"]|\\")*)" в адресе отправителя письма$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeAttachment">
+            <source><![CDATA[/^(?:|I )should see attachment "(?P<text>(?:[^"]|\\")*)" in mail message$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть прикрепленный к письму файл "(?P<text>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iFollowLinkInMailMessage">
+            <source><![CDATA[/^(?:|I )follow "(?P<linkPattern>(?:[^"]|\\")*)" from mail message$/]]></source>
+            <target><![CDATA[/^(?:|я )перехожу по ссылке "(?P<linkPattern>(?:[^"]|\\")*)" из письма$/]]></target>
+        </trans-unit>
+        <trans-unit id="iFillInFromMailValue">
+            <source><![CDATA[/^(?:|I )fill in "(?P<field>(?:[^"]|\\")*)" by pattern "(?P<pattern>(?:[^"]|\\")*)" from mail body$/]]></source>
+            <target><![CDATA[/^(?:|я )заполняю поле "(?P<field>(?:[^"]|\\")*)" по шаблону "(?P<pattern>(?:[^"]|\\")*)" из тела письма$/]]></target>
+        </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -5,113 +5,23 @@ namespace Staffim\Behat\MailExtension;
 class Mailbox
 {
     /**
-     * @var \ezcMailPop3Transport
-     */
-    private $mailTransport;
-
-    /**
-     * @var int
-     */
-    private $numMail;
-
-    /**
      * @var \Colada\IteratorCollection
      */
     private $mails;
 
-    /**
-     * @var int
-     */
-    private $sizeMail;
-
-    public function __construct($mailServer, $user, $password)
+    public function __construct($mails)
     {
-        $this->mailTransport = new \ezcMailPop3Transport($mailServer);
-
-        $mailParser = new \ezcMailParser();
-
-        $this->mailTransport->authenticate($user, $password);
-
-        $mails = $this->mailTransport->fetchAll();
-        $mails = $mailParser->parseMail($mails);
-
         $this->mails = to_collection($mails)->mapBy(function($mail) {
             return new Message($mail);
         });
     }
 
     /**
-     * Authenticate on mail server and delete all messages.
-     *
-     * @deprecated
-     *
-     * @param string $mailServer
-     * @param string $user
-     * @param string $password
-     *
-     * @return bool
-     */
-    // TODO Remove this method — connect and remove all message from connected object instead.
-    public static function resetMailbox($mailServer, $user, $password)
-    {
-        $mailTransport = new \ezcMailPop3Transport($mailServer);
-        $mailTransport->authenticate($user, $password);
-
-        $count = 0;
-        $size  = 0;
-        $mailTransport->status($count, $size);
-
-        for ($numMessage = 1; $numMessage <= $count; $numMessage++) {
-            $mailTransport->delete($numMessage);
-        }
-
-        $mailTransport->disconnect();
-    }
-
-    public function __destruct()
-    {
-        $this->disconnect();
-    }
-
-    /**
      * @return \Colada\IteratorCollection
      */
-    // TODO Rename to "getMessages".
-    public function getMails()
+    public function getMessages()
     {
         return $this->mails;
-    }
-
-    public function disconnect()
-    {
-        try {
-            $this->mailTransport->disconnect();
-        } catch (\ezcMailTransportException $e) {
-             // Ignore transport exceptions.
-        }
-    }
-
-
-    public function deleteMail()
-    {
-        $count = $this->number();
-        for ( $numMessage = 1; $numMessage <= $count; $numMessage++) {
-            $this->mailTransport->delete($numMessage);
-        }
-    }
-
-    public function size()
-    {
-        $this->mailTransport->status($this->numMail, $this->sizeMail);
-
-        return $this->sizeMail;
-    }
-
-    public function number()
-    {
-        $this->mailTransport->status($this->numMail, $this->sizeMail);
-
-        return $this->numMail;
     }
 
     /**
@@ -132,9 +42,9 @@ class Mailbox
      * @return string
      */
     // TODO WTF?! Rename to more informative name.
-    public function getMailInfo()
+    public function getMailFromToSubject()
     {
-        if ($this->getMails()->isEmpty()) {
+        if ($this->getMessages()->isEmpty()) {
             return 'Mailbox is empty';
         }
 
@@ -199,7 +109,7 @@ class Mailbox
     public function findByEqualSubject($subject)
     {
         return $this->mails->findBy(function(Message $mail) use($subject) {
-            return $mail->isEqualToSubject($subject);
+            return $mail->isEqualBySubject($subject);
         });
     }
 }
