@@ -15,7 +15,7 @@ class MailContext extends RawMailContext
         if (!$this->getMailAgent()->wait($sleepTime, $count)) {
             // TODO Split message to short (default exception message) and detail description.
             throw new \Exception(
-                "Not found $count mail messages after $sleepTime\n Messages:\n"
+                "Not found $count mail messages after $sleepTime\n"
                     . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
             );
         }
@@ -33,7 +33,7 @@ class MailContext extends RawMailContext
             // TODO Split message to short (default exception message) and detail description.
             throw new \Exception(
                 "There are $count mail messages, not $expectedCount\n"
-                . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
+                    . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
             );
         }
     }
@@ -116,8 +116,8 @@ class MailContext extends RawMailContext
     public function iShouldSeeServerAddressInFrom($arg1)
     {
         return array(
-            new Step\When(sprintf('should see "%s" as reply address in mail message$/', $this->getMailAgentParameters()["baseAddress"])),
-            new Step\When(sprintf('should see "%s" as reply address in mail message$/', $arg1))
+            new Step\When(sprintf('should see "%s" as reply address in mail message', $this->getMailAgentParameters()["baseAddress"])),
+            new Step\When(sprintf('should see "%s" as reply address in mail message', $arg1))
         );
     }
 
