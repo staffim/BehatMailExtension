@@ -255,4 +255,25 @@ class MailAgent implements MailAgentInterface
 
         return $replyMail;
     }
+
+    /**
+     * Waits some time or number messages.
+     *
+     * @param integer $time      time in milliseconds
+     * @param integer $number
+     *
+     * @return bool
+     */
+    public function wait($time, $number = 0)
+    {
+        $start = microtime(true);
+        $end = $start + $time / 1000.0;
+
+        do {
+            $result = (bool) ($number <= $this->number());
+            usleep(100000);
+        } while ( microtime(true) < $end && !$result );
+
+        return (bool)$result;
+    }
 }

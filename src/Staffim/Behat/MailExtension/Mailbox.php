@@ -48,7 +48,7 @@ class Mailbox
             return 'Mailbox is empty';
         }
 
-        return "Messages: \n" . $this->mails->mapBy(function(Message $mail) {
+        return $this->mails->mapBy(function(Message $mail) {
             return $mail->serializeAddressHeaders();
         })->join("\n");
     }

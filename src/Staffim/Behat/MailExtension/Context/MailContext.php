@@ -7,9 +7,24 @@ use Behat\Behat\Context\Step;
 class MailContext extends RawMailContext
 {
     /**
-     * @Then /^(?:|I )should see (?P<count>\d+) new mail messag(e|es)$/
+     * @Then /^(?:|I )should see (?P<count>\d+) new mail messag(e|es) after waiting$/
      */
-    public function iShouldSeeNewMailMessages($count)
+    public function iShouldSeeNewMailMessagesAfterWaiting($count)
+    {
+        $sleepTime = $this->getMailAgentParameters()['maxSleepTime'];
+        if (!$this->getMailAgent()->wait($sleepTime, $count)) {
+            // TODO Split message to short (default exception message) and detail description.
+            throw new \Exception(
+                "Not found $count mail messages after $sleepTime\n Messages:\n"
+                    . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
+            );
+        }
+    }
+
+    /**
+     * @Then /^(?:|I )should see (?P<count>\d+) messag(e|es)$/
+     */
+    public function iShouldSeeMailMessages($count)
     {
         $expectedCount = $count;
         $count         = $this->getMailAgent()->getMailbox()->getMessages()->count();
@@ -18,7 +33,7 @@ class MailContext extends RawMailContext
             // TODO Split message to short (default exception message) and detail description.
             throw new \Exception(
                 "There are $count mail messages, not $expectedCount\n"
-                    . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
+                . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
             );
         }
     }

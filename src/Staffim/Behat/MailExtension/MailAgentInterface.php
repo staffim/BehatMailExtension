@@ -27,4 +27,14 @@ interface MailAgentInterface
      * Remove messages from server
      */
     public function removeMessages();
+
+    /**
+     * Waits some time or number messages.
+     *
+     * @param integer $time      time in milliseconds
+     * @param integer  $number
+     *
+     * @return bool
+     */
+    public function wait($time, $number);
 }
