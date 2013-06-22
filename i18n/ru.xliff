@@ -32,7 +32,7 @@
         </trans-unit>
         <trans-unit id="iReceiveMailMessages">
             <source><![CDATA[/^(?:|I )receive mail messages$/]]></source>
-            <target><![CDATA[/^(?:|я )за(шел|хожу) на почтовый сервер$/]]></target>
+            <target><![CDATA[/^(?:|я )получ(ил|аю) почту$/]]></target>
         </trans-unit>
         <trans-unit id="iShouldSeeNewMailMessagesAfterWaiting">
             <source><![CDATA[/^(?:|I )should see (?P<count>\d+) new mail messag(e|es) after waiting$/]]></source>

@@ -3,6 +3,7 @@
 namespace Staffim\Behat\MailExtension\Context;
 
 use Behat\Behat\Context\Step;
+use Behat\Gherkin\Node\PyStringNode;
 
 class MailContext extends RawMailContext
 {
@@ -129,5 +130,13 @@ class MailContext extends RawMailContext
         $date = (new \DateTime($arg1))->modify("+$arg2 days")->format('d.m.Y H:');
 
         return new Step\When(sprintf('should see "%s" in mail message', $date));
+    }
+    
+    /**
+     * @Given /^(?:|я )отправляю ответ с текстом:$/
+     */
+    public function iReplyWithTextMessage(PyStringNode $pystring)
+    {
+        return new Step\Given('отправляю ответ с текстом "' . $pystring->getRaw() . '"');
     }
 }
