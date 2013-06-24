@@ -75,7 +75,7 @@ class Extension extends BehatExtension implements ExtensionInterface
                     defaultValue(isset($config['baseAddress']) ? $config['baseAddress'] : null)->
                 end()->
                 scalarNode('maxSleepTime')->
-                    defaultValue(isset($config['maxSleepTime']) ? $config['maxSleepTime'] : 2000)->
+                    defaultValue(isset($config['maxSleepTime']) ? $config['maxSleepTime'] : 2)->
                 end()->
             end()->
         end();

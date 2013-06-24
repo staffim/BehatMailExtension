@@ -34,6 +34,10 @@
             <source><![CDATA[/^(?:|I )receive mail messages$/]]></source>
             <target><![CDATA[/^(?:|я )получ(ил|аю) почту$/]]></target>
         </trans-unit>
+        <trans-unit id="iShouldSeeNewMailMessagesAfterSeconds">
+            <source><![CDATA[/^(?:|I )should see (?P<count>\d+) new mail messag(e|es) after (?P<time>\d+) seconds$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть (?P<count>\d+) нов(ых|ое) пис(ем|ьма|ьмо) через (?P<time>\d+) секунд(|ы)$/]]></target>
+        </trans-unit>
         <trans-unit id="iShouldSeeNewMailMessagesAfterWaiting">
             <source><![CDATA[/^(?:|I )should see (?P<count>\d+) new mail messag(e|es) after waiting$/]]></source>
             <target><![CDATA[/^(?:|я )должен видеть (?P<count>\d+) нов(ых|ое) пис(ем|ьма|ьмо)$/]]></target>

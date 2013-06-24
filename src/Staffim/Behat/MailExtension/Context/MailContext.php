@@ -8,15 +8,29 @@ use Behat\Gherkin\Node\PyStringNode;
 class MailContext extends RawMailContext
 {
     /**
+     * @Then /^(?:|I )should see (?P<count>\d+) new mail messag(e|es) after (?P<time>\d+) seconds$/
+     */
+    public function iShouldSeeNewMailMessagesAfterTime($count, $time)
+    {
+        if (!$this->getMailAgent()->wait($time * 1000, $count)) {
+            // TODO Split message to short (default exception message) and detail description.
+            throw new \Exception(
+                "Not found $count mail messages after $time seconds\n"
+                . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
+            );
+        }
+    }
+
+    /**
      * @Then /^(?:|I )should see (?P<count>\d+) new mail messag(e|es) after waiting$/
      */
     public function iShouldSeeNewMailMessagesAfterWaiting($count)
     {
         $sleepTime = $this->getMailAgentParameters()['maxSleepTime'];
-        if (!$this->getMailAgent()->wait($sleepTime, $count)) {
+        if (!$this->getMailAgent()->wait($sleepTime  * 1000, $count)) {
             // TODO Split message to short (default exception message) and detail description.
             throw new \Exception(
-                "Not found $count mail messages after $sleepTime\n"
+                "Not found $count mail messages after $sleepTime seconds\n"
                     . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
             );
         }
@@ -131,7 +145,7 @@ class MailContext extends RawMailContext
 
         return new Step\When(sprintf('should see "%s" in mail message', $date));
     }
-    
+
     /**
      * @Given /^(?:|я )отправляю ответ с текстом:$/
      */
