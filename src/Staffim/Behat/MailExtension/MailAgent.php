@@ -123,12 +123,13 @@ class MailAgent implements MailAgentInterface
 
     /**
      * @return \ezcMailSmtpTransport
-     *
-     * @throws \Exception
      */
-    // TODO To option.
     public function getSmtpTransport()
     {
+        if (!$this->smtpTransport) {
+            $this->connectSmtpServer();
+        }
+
         return $this->smtpTransport;
     }
 
