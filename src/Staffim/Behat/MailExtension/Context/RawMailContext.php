@@ -5,10 +5,14 @@ namespace Staffim\Behat\MailExtension\Context;
 use Behat\Behat\Context\Step;
 use Behat\Behat\Context\BehatContext;
 use Behat\Behat\Context\TranslatedContextInterface;
+use Behat\Behat\Event\ScenarioEvent;
+use Behat\Behat\Event\StepEvent;
+use Behat\Behat\Formatter\FailedScenariosFormatter;
 use Staffim\Behat\MailExtension\Account;
 use Staffim\Behat\MailExtension\Context\MailAwareInterface;
 use Staffim\Behat\MailExtension\MailAgent;
 use Staffim\Behat\MailExtension\Message;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class RawMailContext extends BehatContext implements MailAwareInterface, TranslatedContextInterface
 {
@@ -75,6 +79,39 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
     public function getMailAgentParameters()
     {
         return $this->mailAgentParameters;
+    }
+
+    /**
+     * Return parameters provided for MailAgent.
+     *
+     * @param string $key
+     * @throws \Symfony\Component\Config\Definition\Exception\Exception
+     * @return mixed $parameter
+     */
+    public function getMailAgentParameter($key)
+    {
+        if (!isset($this->mailAgentParameters[$key])) {
+            throw new Exception("Parameter doesn't exist");
+        }
+
+        return $this->mailAgentParameters[$key];
+    }
+
+    /**
+     * @AfterScenario
+     */
+    public function saveMailMessageAfterFail(ScenarioEvent $event) {
+        if ($this->getMailAgentParameters('failedMailDir') && ($event->getResult() === StepEvent::FAILED) && $this->getMail()) {
+            $scenario = $event->getScenario();
+
+            $eventTitle = explode('features/', $scenario->getFile() . ':' . $scenario->getLine())[1];
+            $eventTitle = str_replace(['/', '\\'], '.', $eventTitle);
+
+            $mailTo = $this->getMail()->getTo();
+            $fileName = $eventTitle . $mailTo[0] . ':' . str_replace(['/', '\\'], '.', $this->getMail()->getSubject());
+
+            file_put_contents($this->getMailAgentParameters('failedMailDir') . $fileName, $this->getMail()->getRawParsedMessage());
+        }
     }
 
     /**

@@ -124,6 +124,14 @@ class Message
     /**
      * @return string
      */
+    public function getRawParsedMessage()
+    {
+        return $this->mail->generate();
+    }
+
+    /**
+     * @return string
+     */
     public function getPlainMessage()
     {
         $plainMessage = explode('Content-Type: text/html;', $this->mail->generate())[0];

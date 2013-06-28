@@ -74,8 +74,11 @@ class Extension extends BehatExtension implements ExtensionInterface
                 scalarNode('baseAddress')->
                     defaultValue(isset($config['baseAddress']) ? $config['baseAddress'] : null)->
                 end()->
-                scalarNode('maxSleepTime')->
-                    defaultValue(isset($config['maxSleepTime']) ? $config['maxSleepTime'] : 2)->
+                scalarNode('maxDuration')->
+                    defaultValue(isset($config['maxDuration']) ? $config['maxDuration'] : 2000)->
+                end()->
+                scalarNode('failedMailDir')->
+                    defaultValue(isset($config['failedMailDir']) ? $config['failedMailDir'] : null)->
                 end()->
             end()->
         end();

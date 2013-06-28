@@ -26,11 +26,11 @@ class MailContext extends RawMailContext
      */
     public function iShouldSeeNewMailMessagesAfterWaiting($count)
     {
-        $sleepTime = $this->getMailAgentParameters()['maxSleepTime'];
-        if (!$this->getMailAgent()->wait($sleepTime  * 1000, $count)) {
+        $sleepTime = $this->getMailAgentParameter('maxDuration');
+        if (!$this->getMailAgent()->wait($sleepTime, $count)) {
             // TODO Split message to short (default exception message) and detail description.
             throw new \Exception(
-                "Not found $count mail messages after $sleepTime seconds\n"
+                "Not found $count mail messages after $sleepTime milliseconds\n"
                     . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
             );
         }
@@ -131,7 +131,7 @@ class MailContext extends RawMailContext
     public function iShouldSeeServerAddressInFrom($arg1)
     {
         return array(
-            new Step\When(sprintf('should see "%s" as reply address in mail message', $this->getMailAgentParameters()["baseAddress"])),
+            new Step\When(sprintf('should see "%s" as reply address in mail message', $this->getMailAgentParameter('baseAddress'))),
             new Step\When(sprintf('should see "%s" as reply address in mail message', $arg1))
         );
     }
