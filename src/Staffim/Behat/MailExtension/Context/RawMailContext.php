@@ -101,7 +101,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
      * @AfterScenario
      */
     public function saveMailMessageAfterFail(ScenarioEvent $event) {
-        if ($this->getMailAgentParameters('failedMailDir') && ($event->getResult() === StepEvent::FAILED) && $this->getMail()) {
+        if ($this->getMailAgentParameter('failedMailDir') && ($event->getResult() === StepEvent::FAILED) && $this->getMail()) {
             $scenario = $event->getScenario();
 
             $eventTitle = explode('features/', $scenario->getFile() . ':' . $scenario->getLine())[1];
@@ -110,7 +110,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
             $mailTo = $this->getMail()->getTo();
             $fileName = $eventTitle . $mailTo[0] . ':' . str_replace(['/', '\\'], '.', $this->getMail()->getSubject());
 
-            file_put_contents($this->getMailAgentParameters('failedMailDir') . $fileName, $this->getMail()->getRawParsedMessage());
+            file_put_contents($this->getMailAgentParameter('failedMailDir') . $fileName, $this->getMail()->getRawParsedMessage());
         }
     }
 
