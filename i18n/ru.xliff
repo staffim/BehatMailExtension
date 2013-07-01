@@ -18,6 +18,10 @@
             <source><![CDATA[/^(?:|I )reply with "(?P<text>(?:[^"]|\\")*)"$/]]></source>
             <target><![CDATA[/^(?:|я )отправляю ответ с текстом "(?P<text>(?:[^"]|\\")*)"$/]]></target>
         </trans-unit>
+        <trans-unit id="iReplyWithAttach">
+            <source><![CDATA[/^(?:|I )reply with "(?P<text>(?:[^"]|\\")*)" and attach "(?P<filename>(?:[^"]|\\")*)"$/]]></source>
+            <target><![CDATA[/^(?:|я )отправляю ответ с текстом "(?P<text>(?:[^"]|\\")*)" и вложением "(?P<filename>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
         <trans-unit id="iSendMail">
             <source><![CDATA[/^(?:|I )send mail with subject "(?P<subject>(?:[^"]|\\")*)" and body "(?P<body>(?:[^"]|\\")*)" to address "(?P<to>(?:[^"]|\\")*)" from "(?P<from>(?:[^"]|\\")*)"$/]]></source>
             <target><![CDATA[/^(?:|я )отправляю письмо с темой "(?P<subject>(?:[^"]|\\")*)" и текстом "(?P<body>(?:[^"]|\\")*)" по адресу "(?P<to>(?:[^"]|\\")*)" от "(?P<from>(?:[^"]|\\")*)"$/]]></target>

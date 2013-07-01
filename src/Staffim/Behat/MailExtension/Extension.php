@@ -80,6 +80,9 @@ class Extension extends BehatExtension implements ExtensionInterface
                 scalarNode('failedMailDir')->
                     defaultValue(isset($config['failedMailDir']) ? $config['failedMailDir'] : null)->
                 end()->
+                scalarNode('filesPath')->
+                    defaultValue(isset($config['filesPath']) ? $config['filesPath'] : '')->
+                end()->
             end()->
         end();
     }

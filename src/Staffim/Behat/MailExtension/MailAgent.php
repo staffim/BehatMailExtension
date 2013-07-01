@@ -246,13 +246,22 @@ class MailAgent implements MailAgentInterface
     /**
      * @param \ezcMail $mail
      * @param string $text
+     * @param string $fileName
      *
      * @return \ezcMail
      */
-    public function createReplyMessage($mail, $text)
+    public function createReplyMessage($mail, $text, $fileName = null)
     {
         $replyMail = \ezcMailTools::replyToMail($mail, $mail->to[0]);
-        $replyMail->body = new \ezcMailText($text, 'utf8', '8bit', 'utf8');
+        $textPart = new \ezcMailText($text, 'utf8', '8bit', 'utf8');
+
+        if ($fileName) {
+            $fileAttachment = new \ezcMailFile( $fileName );
+// Specify the body of the mail as a multipart-mixed of the text part and the file attachment
+            $replyMail->body = new \ezcMailMultipartMixed( $textPart, $fileAttachment);
+        } else {
+            $replyMail->body = $textPart;
+        }
 
         return $replyMail;
     }

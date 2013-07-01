@@ -1,9 +1,7 @@
 parameters:
   behat.mail_extension.context.initializer.class: Staffim\Behat\MailExtension\Context\Initializer\MailAwareInitializer
-  behat.mail_extension.parameters: ~
   behat.mail_extension.pop3_server: ~
   behat.mail_extension.smtp_server: ~
-  behat.mail_extension.address: ~
   behat.mail_extension.pop3_auth: ~
   behat.mail_extension.smtp_auth: ~
 
