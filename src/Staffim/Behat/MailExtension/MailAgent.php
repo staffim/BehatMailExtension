@@ -196,6 +196,7 @@ class MailAgent implements MailAgentInterface
     public function send($mail)
     {
         $this->connectSmtpServer();
+        $mail->subjectCharset = 'utf-8';
         $this->smtpTransport->send($mail);
     }
 
