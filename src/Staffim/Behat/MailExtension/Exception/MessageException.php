@@ -15,6 +15,11 @@ class MessageException extends Exception
     protected $mailMessage;
 
     /**
+     * @var ExceptionFormatter
+     */
+    private $formatter;
+
+    /**
      * @return \Staffim\Behat\MailExtension\Message
      */
     public function getMailMessage()
@@ -27,11 +32,13 @@ class MessageException extends Exception
      *
      * @param string $message   optional message
      * @param \Staffim\Behat\MailExtension\Message $mailMessage
+     * @param ExceptionFormatter $formatter
      * @param Exception $exception
      */
-    public function __construct($message = null, Message $mailMessage, Exception $exception = null)
+    public function __construct($message = null, Message $mailMessage, ExceptionFormatter $formatter = null, Exception $exception = null)
     {
         $this->mailMessage = $mailMessage;
+        $this->formatter = $formatter ?: new BaseExceptionFormatter;
 
         parent::__construct($message ?: $exception->getMessage(), null,  $exception);
     }
@@ -44,11 +51,8 @@ class MessageException extends Exception
     public function __toString()
     {
         try {
-            $mailBody = $this->trimString($this->getMailMessage()->getRawParsedMessage());
-            $string = sprintf("%s\n\nRaw message:\n%s",
-                $this->getMessage(),
-                $this->pipeString($mailBody."\n")
-            );
+            $formatter = $this->formatter;
+            $string = $formatter($this->getMessage(), $this->getMailMessage());
         } catch (\Exception $e) {
             return $this->getMessage();
         }

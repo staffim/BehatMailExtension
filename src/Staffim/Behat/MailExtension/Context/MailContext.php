@@ -5,9 +5,9 @@ namespace Staffim\Behat\MailExtension\Context;
 use Behat\Behat\Context\Step;
 use Behat\Gherkin\Node\PyStringNode;
 use Staffim\Behat\MailExtension\Exception\MailboxException,
-    Staffim\Behat\MailExtension\Exception\MessageBodyException,
-    Staffim\Behat\MailExtension\Exception\MessageException,
-    Staffim\Behat\MailExtension\Exception\PlainMessageException;
+    Staffim\Behat\MailExtension\Exception\MessageException;
+use Staffim\Behat\MailExtension\Exception\MessageBodyFormatter;
+use Staffim\Behat\MailExtension\Exception\PlainMessageFormatter;
 
 class MailContext extends RawMailContext
 {
@@ -72,7 +72,7 @@ class MailContext extends RawMailContext
     public function iShouldSeeInMailMessage($text)
     {
         if (!$this->getMail()->findInBody($text)) {
-            throw new MessageBodyException(sprintf('Mail with "%s" in message body not found.', $text), $this->getMail());
+            throw new MessageException(sprintf('Mail with "%s" in message body not found.', $text), $this->getMail(), new MessageBodyFormatter());
         }
     }
 
@@ -82,7 +82,7 @@ class MailContext extends RawMailContext
     public function iShouldSeeAsReplyAddress($text)
     {
         if (!$this->getMail()->findInFrom($text)) {
-            throw new PlainMessageException(sprintf('Mail with "%s" in address of message sender not found.', $text), $this->getMail());
+            throw new MessageException(sprintf('Mail with "%s" in address of message sender not found.', $text), $this->getMail(), new PlainMessageFormatter());
         }
     }
 
@@ -104,7 +104,7 @@ class MailContext extends RawMailContext
         $matches = $this->getMail()->findBodyMatches($linkPattern);
 
         if (empty($matches)) {
-            throw new MessageBodyException(sprintf('Not matches for pattern "%s" in message body.', $linkPattern), $this->getMail());
+            throw new MessageException(sprintf('Not matches for pattern "%s" in message body.', $linkPattern), $this->getMail(), new MessageBodyFormatter);
         }
 
         return new Step\Given(sprintf('am on "%s"', $matches[2]));
