@@ -219,10 +219,6 @@ class Message
     public function findBodyMatches($pattern)
     {
         preg_match($pattern, $this->getBody(), $matches);
-        if (empty($matches)) {
-            // TODO Split message to short (default exception message) and detail description.
-            throw new \Exception(sprintf('Not matches for pattern "%s" in message body: %s', $pattern, $this->getBody()));
-        }
 
         return $matches;
     }

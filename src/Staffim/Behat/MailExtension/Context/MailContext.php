@@ -4,6 +4,10 @@ namespace Staffim\Behat\MailExtension\Context;
 
 use Behat\Behat\Context\Step;
 use Behat\Gherkin\Node\PyStringNode;
+use Staffim\Behat\MailExtension\Exception\MailboxException,
+    Staffim\Behat\MailExtension\Exception\MessageBodyException,
+    Staffim\Behat\MailExtension\Exception\MessageException,
+    Staffim\Behat\MailExtension\Exception\PlainMessageException;
 
 class MailContext extends RawMailContext
 {
@@ -13,11 +17,8 @@ class MailContext extends RawMailContext
     public function iShouldSeeNewMailMessagesAfterTime($count, $time)
     {
         if (!$this->getMailAgent()->wait($time * 1000, $count)) {
-            // TODO Split message to short (default exception message) and detail description.
-            throw new \Exception(
-                "Not found $count mail messages after $time seconds\n"
-                . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
-            );
+            throw new MailboxException(sprintf('Not found %s mail messages after %s milliseconds', $count, $time), $this->getMailAgent()->getMailbox());
+
         }
     }
 
@@ -28,11 +29,7 @@ class MailContext extends RawMailContext
     {
         $sleepTime = $this->getMailAgentParameter('maxDuration');
         if (!$this->getMailAgent()->wait($sleepTime, $count)) {
-            // TODO Split message to short (default exception message) and detail description.
-            throw new \Exception(
-                "Not found $count mail messages after $sleepTime milliseconds\n"
-                    . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
-            );
+            throw new MailboxException(sprintf('Not found %s mail messages after %s milliseconds', $count, $sleepTime), $this->getMailAgent()->getMailbox());
         }
     }
 
@@ -45,11 +42,7 @@ class MailContext extends RawMailContext
         $count         = $this->getMailAgent()->getMailbox()->getMessages()->count();
 
         if ($count !== (int) $expectedCount) {
-            // TODO Split message to short (default exception message) and detail description.
-            throw new \Exception(
-                "There are $count mail messages, not $expectedCount\n"
-                    . $this->getMailAgent()->getMailbox()->getMailFromToSubject()
-            );
+            throw new MailboxException(sprintf('There are %s mail messages, not %s', $count, $expectedCount), $this->getMailAgent()->getMailbox());
         }
     }
 
@@ -60,7 +53,7 @@ class MailContext extends RawMailContext
     {
         $this->getMailAgent()->getMailbox()
             ->findBySubject($text)
-            ->orThrow(new \Exception('Message with "' . $text . '" in subject not found.'));
+            ->orThrow(new MailboxException(sprintf('Mail with "%s" in subject not found.', $text), $this->getMailAgent()->getMailbox()));
     }
 
     /**
@@ -70,7 +63,7 @@ class MailContext extends RawMailContext
     {
         $this->getMailAgent()->getMailbox()
             ->findByEqualSubject($subject)
-            ->orThrow(new \Exception('Message with "' . $subject . '" subject not found.'));
+            ->orThrow(new MailboxException(sprintf('Mail with "%s" subject not found.', $subject), $this->getMailAgent()->getMailbox()));
     }
 
     /**
@@ -79,8 +72,7 @@ class MailContext extends RawMailContext
     public function iShouldSeeInMailMessage($text)
     {
         if (!$this->getMail()->findInBody($text)) {
-            // TODO Split message to short (default exception message) and detail description.
-            throw new \Exception("Mail with \"$text\" in message body not found.\n" . $this->getMail()->getPlainMessage());
+            throw new MessageBodyException(sprintf('Mail with "%s" in message body not found.', $text), $this->getMail());
         }
     }
 
@@ -90,7 +82,7 @@ class MailContext extends RawMailContext
     public function iShouldSeeAsReplyAddress($text)
     {
         if (!$this->getMail()->findInFrom($text)) {
-            throw new \Exception("Mail with $text in address of message sender not found\n" . $this->getMail()->getPlainMessage());
+            throw new PlainMessageException(sprintf('Mail with "%s" in address of message sender not found.', $text), $this->getMail());
         }
     }
 
@@ -100,7 +92,7 @@ class MailContext extends RawMailContext
     public function iShouldSeeAttachment($text)
     {
         if (!$this->getMail()->findInAttachment($text)) {
-            throw new \Exception(sprintf('Mail with "%s" in attachment file name not found.', $text));
+            throw new MessageException(sprintf('Mail with "%s" in attachment file name not found.', $text), $this->getMail());
         }
     }
 
@@ -111,6 +103,10 @@ class MailContext extends RawMailContext
     {
         $matches = $this->getMail()->findBodyMatches($linkPattern);
 
+        if (empty($matches)) {
+            throw new MessageBodyException(sprintf('Not matches for pattern "%s" in message body.', $linkPattern), $this->getMail());
+        }
+
         return new Step\Given(sprintf('am on "%s"', $matches[2]));
     }
 
@@ -120,6 +116,10 @@ class MailContext extends RawMailContext
     public function iFillInFromMailValue($field, $pattern)
     {
         $matches = $this->getMail()->findBodyMatches($pattern);
+
+        if (empty($matches)) {
+            throw new MessageException(sprintf('Not matches for pattern "%s"', $pattern), $this->getMail());
+        }
 
         return new Step\Given(sprintf('fill in "%s" with "%s"', $field, $matches[1]));
     }

@@ -41,7 +41,6 @@ class Mailbox
     /**
      * @return string
      */
-    // TODO WTF?! Rename to more informative name.
     public function getMailFromToSubject()
     {
         if ($this->getMessages()->isEmpty()) {
