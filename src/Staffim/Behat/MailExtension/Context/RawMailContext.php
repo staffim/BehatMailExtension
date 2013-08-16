@@ -108,7 +108,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
             $eventTitle = str_replace(['/', '\\'], '.', $eventTitle);
 
             $mailTo = $this->getMail()->getTo();
-            $fileName = $eventTitle . $mailTo[0] . ':' . str_replace(['/', '\\'], '.', $this->getMail()->getSubject());
+            $fileName = $eventTitle . $mailTo[0] . ':' . str_replace(['/', '\\'], '.', $this->getMail()->getSubject() . '.html');
 
             file_put_contents($this->getMailAgentParameter('failedMailDir') . $fileName, $this->getMail()->getRawParsedMessage());
         }
