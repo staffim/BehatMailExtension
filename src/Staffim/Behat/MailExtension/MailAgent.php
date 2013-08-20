@@ -257,9 +257,9 @@ class MailAgent implements MailAgentInterface
         $textPart = new \ezcMailText($text, 'utf8', '8bit', 'utf8');
 
         if ($fileName) {
-            $fileAttachment = new \ezcMailFile( $fileName );
-// Specify the body of the mail as a multipart-mixed of the text part and the file attachment
-            $replyMail->body = new \ezcMailMultipartMixed( $textPart, $fileAttachment);
+            $fileAttachment = new \ezcMailFile($fileName);
+            // Specify the body of the mail as a multipart-mixed of the text part and the file attachment
+            $replyMail->body = new \ezcMailMultipartMixed($textPart, $fileAttachment);
         } else {
             $replyMail->body = $textPart;
         }
@@ -283,7 +283,7 @@ class MailAgent implements MailAgentInterface
         do {
             $result = (bool) ($number <= $this->number());
             usleep(100000);
-        } while ( microtime(true) < $end && !$result );
+        } while (microtime(true) < $end && !$result);
 
         return (bool)$result;
     }

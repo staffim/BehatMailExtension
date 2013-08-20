@@ -7,9 +7,9 @@ use Behat\Behat\Context\BehatContext;
 use Behat\Behat\Context\TranslatedContextInterface;
 use Behat\Behat\Event\ScenarioEvent;
 use Behat\Behat\Event\StepEvent;
-use Behat\Behat\Formatter\FailedScenariosFormatter;
 use Staffim\Behat\MailExtension\Account;
 use Staffim\Behat\MailExtension\Context\MailAwareInterface;
+use Staffim\Behat\MailExtension\Exception\MailboxException;
 use Staffim\Behat\MailExtension\MailAgent;
 use Staffim\Behat\MailExtension\Message;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -168,8 +168,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
     {
         $this->mail = $this->getMailAgent()->getMailbox()
             ->findBySubject($subject)
-            // TODO Split message to short (default exception message) and detail description.
-            ->orThrow(new \Exception("Mail with $subject in subject text not found.\nMessages:\n" . $this->getMailAgent()->getMailbox()->getMailFromToSubject()));
+            ->orThrow(new MailboxException(sprintf('Mail with "%s" in subject text not found.', $subject), $this->getMailAgent()->getMailbox()));
     }
 
     /**
@@ -179,8 +178,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
     {
         $this->mail = $this->getMailAgent()->getMailbox()
             ->findByRecipient($address)
-            // TODO Split message to short (default exception message) and detail description.
-            ->orThrow(new \Exception('Mail with "$address" in recipient addresses not found'."\nMessages:\n" . $this->getMailAgent()->getMailbox()->getMailFromToSubject()));
+            ->orThrow(new MailboxException(sprintf('Mail with "%s" in recipient addresses not found', $address), $this->getMailAgent()->getMailbox()));
     }
 
     /**
