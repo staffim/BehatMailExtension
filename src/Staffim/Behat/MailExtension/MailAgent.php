@@ -268,6 +268,36 @@ class MailAgent implements MailAgentInterface
     }
 
     /**
+     * @param \ezcMail $mail
+     * @param string $filename
+     *
+     * @return \ezcMail
+     */
+    public function createReplyMessageFromFile($mail, $filename)
+    {
+        $replyMail = \ezcMailTools::replyToMail($mail, $mail->to[0]);
+        $fileMail = $this->createMessageFromFile($filename);
+        $replyMail->body = $fileMail->body;
+
+        return $replyMail;
+    }
+
+    /**
+     * Parse mail directly from files on disk
+     *
+     * @param string $filename
+     *
+     * @return \ezcMail
+     */
+    public function createMessageFromFile($filename)
+    {
+        $set = new \ezcMailFileSet([$filename]);
+        $mail = $this->mailParser->parseMail($set);
+
+        return $mail[0];
+    }
+
+    /**
      * Waits some time or number messages.
      *
      * @param integer $time      time in milliseconds

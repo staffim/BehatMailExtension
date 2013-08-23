@@ -26,6 +26,14 @@
             <source><![CDATA[/^(?:|I )send mail with subject "(?P<subject>(?:[^"]|\\")*)" and body "(?P<body>(?:[^"]|\\")*)" to address "(?P<to>(?:[^"]|\\")*)" from "(?P<from>(?:[^"]|\\")*)"$/]]></source>
             <target><![CDATA[/^(?:|я )отправляю письмо с темой "(?P<subject>(?:[^"]|\\")*)" и текстом "(?P<body>(?:[^"]|\\")*)" по адресу "(?P<to>(?:[^"]|\\")*)" от "(?P<from>(?:[^"]|\\")*)"$/]]></target>
         </trans-unit>
+        <trans-unit id="iSendMailFromFile">
+            <source><![CDATA[/^(?:|I )send mail from file "(?P<filename>(?:[^"]|\\")*)"$/]]></source>
+            <target><![CDATA[/^(?:|я )отправляю письмо из файла "(?P<filename>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iReplyWithMessageFromFile">
+            <source><![CDATA[/^(?:|I )reply with message from file "(?P<filename>(?:[^"]|\\")*)"$/]]></source>
+            <target><![CDATA[/^(?:|я )отправляю ответное письмо из файла "(?P<filename>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
         <trans-unit id="iGoToMailMessag">
             <source><![CDATA[/^(?:|I )go to "(?P<subject>(?:[^"]|\\")*)" mail message$/]]></source>
             <target><![CDATA[/^(?:|я )открываю письмо "(?P<subject>(?:[^"]|\\")*)"$/]]></target>

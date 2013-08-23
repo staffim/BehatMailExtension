@@ -162,6 +162,24 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
     }
 
     /**
+     * @When /^(?:|I )send mail from file "(?P<filename>(?:[^"]|\\")*)"$/
+     */
+    public function iSendMailFromFile($filename)
+    {
+        $mail = $this->getMailAgent()->createMessageFromFile($this->getMailAgentParameter('filesPath') . $filename);
+        $this->getMailAgent()->send($mail);
+    }
+
+    /**
+     * @When /^(?:|I )reply with message from file "(?P<filename>(?:[^"]|\\")*)"$/
+     */
+    public function iReplyWithMessageFromFile($filename)
+    {
+        $mail = $this->getMailAgent()->createReplyMessageFromFile($this->getMail()->getRawMail(), $this->getMailAgentParameter('filesPath') . $filename);
+        $this->getMailAgent()->send($mail);
+    }
+
+    /**
      * @When /^(?:|I )go to "(?P<subject>(?:[^"]|\\")*)" mail message$/
      */
     public function iGoToMailMessage($subject)
