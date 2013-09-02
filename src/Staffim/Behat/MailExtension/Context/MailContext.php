@@ -17,7 +17,7 @@ class MailContext extends RawMailContext
     public function iShouldSeeNewMailMessagesAfterTime($count, $time)
     {
         if (!$this->getMailAgent()->wait($time * 1000, $count)) {
-            throw new MailboxException(sprintf('Not found %s mail messages after %s milliseconds', $count, $time), $this->getMailAgent()->getMailbox());
+            throw new MailboxException(sprintf('Not found %s mail messages after %s seconds', $count, $time), $this->getMailAgent()->getMailbox());
 
         }
     }
