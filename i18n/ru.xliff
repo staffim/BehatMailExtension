@@ -14,6 +14,10 @@
             <source><![CDATA[/^(?:|I )remove mail messages$/]]></source>
             <target><![CDATA[/^(?:|я )удал(яю|ил) письма с почтового ящика$/]]></target>
         </trans-unit>
+         <trans-unit id="iRemoveMailMessagesFromServer">
+            <source><![CDATA[/^(?:|I )remove mail messages from server$/]]></source>
+            <target><![CDATA[/^(?:|я )удал(яю|ил) письма с сервера почты$/]]></target>
+        </trans-unit>
         <trans-unit id="iReplyWithMessage">
             <source><![CDATA[/^(?:|I )reply with "(?P<text>(?:[^"]|\\")*)"$/]]></source>
             <target><![CDATA[/^(?:|я )отправляю ответ с текстом "(?P<text>(?:[^"]|\\")*)"$/]]></target>

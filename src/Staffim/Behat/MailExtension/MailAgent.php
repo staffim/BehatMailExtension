@@ -201,9 +201,9 @@ class MailAgent implements MailAgentInterface
     }
 
     /**
-     * Remove messages from server
+     * Remove messages only from server
      */
-    public function removeMessages()
+    public function RemoveMessagesFromServer()
     {
         $this->connectPop3Server();
         $count = $this->number();
@@ -211,8 +211,16 @@ class MailAgent implements MailAgentInterface
             $this->pop3Transport->delete($numMessage);
         }
 
-        $this->mailbox = null;
         $this->pop3Transport->disconnect();
+    }
+
+    /**
+     * Remove messages from server and from mailbox
+     */
+    public function removeMessages()
+    {
+        $this->RemoveMessagesFromServer();
+        $this->mailbox = null;
     }
 
     /**

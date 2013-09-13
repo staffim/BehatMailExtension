@@ -153,4 +153,12 @@ class MailContext extends RawMailContext
     {
         return new Step\Given('отправляю ответ с текстом "' . $pystring->getRaw() . '"');
     }
+
+    /**
+     * @When /^(?:|I )remove mail messages from server$/
+     */
+    public function iRemoveMailMessagesFromServer()
+    {
+        $this->getMailAgent()->RemoveMessagesFromServer();
+    }
 }
