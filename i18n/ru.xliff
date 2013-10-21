@@ -78,6 +78,10 @@
             <source><![CDATA[/^(?:|I )should see "(?P<text>(?:[^"]|\\")*)" as reply address in mail message$/]]></source>
             <target><![CDATA[/^(?:|я )должен видеть "(?P<text>(?:[^"]|\\")*)" в адресе отправителя письма$/]]></target>
         </trans-unit>
+        <trans-unit id="iShouldSeeMailMessageWithAddressInRecepients">
+            <source><![CDATA[/^(?:|I )should see mail message with "(?P<address>(?:[^"]|\\")*)" in recipients$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть письмо, адресованное "(?P<address>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
         <trans-unit id="iShouldSeeAttachment">
             <source><![CDATA[/^(?:|I )should see attachment "(?P<text>(?:[^"]|\\")*)" in mail message$/]]></source>
             <target><![CDATA[/^(?:|я )должен видеть прикрепленный к письму файл "(?P<text>(?:[^"]|\\")*)"$/]]></target>

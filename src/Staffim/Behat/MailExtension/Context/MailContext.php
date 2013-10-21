@@ -57,6 +57,16 @@ class MailContext extends RawMailContext
     }
 
     /**
+     * @Then /^(?:|I )should see mail message with "(?P<address>(?:[^"]|\\")*)" in recipients$/
+     */
+    public function iShouldSeeMailMessageWithAddressInRecepients($address)
+    {
+        $this->getMailAgent()->getMailbox()
+            ->findByRecipient($address)
+            ->orThrow(new MailboxException(sprintf('Mail with "%s" in recipients not found.', $address), $this->getMailAgent()->getMailbox()));
+    }
+
+    /**
      * @Then /^(?:|I )should see mail message with subject "(?P<subject>(?:[^"]|\\")*)"$/
      */
     public function iShouldSeeMailMessageWithSubject($subject)
