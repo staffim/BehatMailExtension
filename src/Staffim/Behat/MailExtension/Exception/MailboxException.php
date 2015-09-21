@@ -2,7 +2,6 @@
 
 namespace Staffim\Behat\MailExtension\Exception;
 
-use Behat\Mink\Exception\Exception;
 use Staffim\Behat\MailExtension\Mailbox;
 
 class MailboxException extends Exception
@@ -25,11 +24,11 @@ class MailboxException extends Exception
     /**
      * Initializes exception.
      *
-     * @param string $message   optional
+     * @param string $message Optional.
      * @param \Staffim\Behat\MailExtension\Mailbox $mailbox
-     * @param \Behat\Mink\Exception\Exception $exception
+     * @param \Exception $exception
      */
-    public function __construct($message = null, Mailbox $mailbox, Exception $exception = null)
+    public function __construct($message = null, Mailbox $mailbox, \Exception $exception = null)
     {
         $this->mailbox = $mailbox;
 

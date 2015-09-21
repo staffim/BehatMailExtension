@@ -1,19 +1,21 @@
 parameters:
   behat.mail_extension.context.initializer.class: Staffim\Behat\MailExtension\Context\Initializer\MailAwareInitializer
-  behat.mail_extension.pop3_server: ~
-  behat.mail_extension.smtp_server: ~
-  behat.mail_extension.pop3_auth: ~
-  behat.mail_extension.smtp_auth: ~
-
   behat.mail_extension.mail_agent.class: Staffim\Behat\MailExtension\MailAgent
+  behat.mail_extension.pop3_host: ~
+  behat.mail_extension.pop3_port: ~
+  behat.mail_extension.pop3_user: ~
+  behat.mail_extension.pop3_password: ~
+  behat.mail_extension.smtp_host: ~
+  behat.mail_extension.smtp_port: ~
+  behat.mail_extension.smtp_user: ~
+  behat.mail_extension.smtp_password: ~
 services:
   behat.mail_extension.mail_agent:
     class: %behat.mail_extension.mail_agent.class%
-
+  # TODO To PHP code, see Mink extension for example.
   behat.mail_extension.context.initializer:
     class: %behat.mail_extension.context.initializer.class%
     arguments:
        - %behat.mail_extension.parameters%
-#      - %behat.mail_extension.mail_agent%
     tags:
-      - { name: behat.context.initializer }
+      - { name: context.initializer }

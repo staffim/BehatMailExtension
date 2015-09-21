@@ -10,6 +10,11 @@ class Account implements AccountInterface
     private $server;
 
     /**
+     * @var int
+     */
+    private $port;
+
+    /**
      * @var string
      */
     private $login;
@@ -20,15 +25,33 @@ class Account implements AccountInterface
     private $password;
 
     /**
-     * @param $server string server name
+     * @param string $server
+     * @param int $port
      * @param string $login
      * @param string $password
      */
-    public function __construct($server, $login = '', $password = '')
+    public function __construct($server, $port, $login = '', $password = '')
     {
         $this->server = $server;
+        $this->port = $port;
         $this->login = $login;
         $this->password = $password;
+    }
+
+    /**
+     * @return string
+     */
+    public function getServerName()
+    {
+        return $this->server;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPort()
+    {
+        return $this->port;
     }
 
     /**
@@ -45,13 +68,5 @@ class Account implements AccountInterface
     public function getPassword()
     {
         return $this->password;
-    }
-
-    /**
-     * @return string
-     */
-    public function getServerName()
-    {
-        return $this->server;
     }
 }

@@ -2,13 +2,16 @@
 
 namespace Staffim\Behat\MailExtension\Context;
 
-use Behat\Behat\Context\Step;
-use Behat\Gherkin\Node\PyStringNode;
-use Staffim\Behat\MailExtension\Exception\MailboxException,
-    Staffim\Behat\MailExtension\Exception\MessageException;
+use Staffim\Behat\MailExtension\Exception\MailboxException;
+use Staffim\Behat\MailExtension\Exception\MessageException;
 use Staffim\Behat\MailExtension\Exception\MessageBodyFormatter;
 use Staffim\Behat\MailExtension\Exception\PlainMessageFormatter;
 
+/*
+ * TODO Restore steps from previous version... With chained steps.
+ *
+ * See for details: https://github.com/Behat/Behat/issues/546
+ */
 class MailContext extends RawMailContext
 {
     /**
@@ -27,7 +30,7 @@ class MailContext extends RawMailContext
      */
     public function iShouldSeeNewMailMessagesAfterWaiting($count)
     {
-        $sleepTime = $this->getMailAgentParameter('maxDuration');
+        $sleepTime = $this->getMailAgentParameter('max_duration');
         if (!$this->getMailAgent()->wait($sleepTime, $count)) {
             throw new MailboxException(sprintf('Not found %s mail messages after %s milliseconds', $count, $sleepTime), $this->getMailAgent()->getMailbox());
         }
@@ -104,64 +107,6 @@ class MailContext extends RawMailContext
         if (!$this->getMail()->findInAttachment($text)) {
             throw new MessageException(sprintf('Mail with "%s" in attachment file name not found.', $text), $this->getMail());
         }
-    }
-
-    /**
-     * @Then /^(?:|I )follow "(?P<linkPattern>(?:[^"]|\\")*)" from mail message$/
-     */
-    public function iFollowLinkInMailMessage($linkPattern)
-    {
-        $matches = $this->getMail()->findBodyMatches($linkPattern);
-
-        if (empty($matches)) {
-            throw new MessageException(sprintf('Not matches for pattern "%s" in message body.', $linkPattern), $this->getMail(), new MessageBodyFormatter);
-        }
-
-        return new Step\Given(sprintf('am on "%s"', $matches[2]));
-    }
-
-    /**
-     * @Then /^(?:|I )fill in "(?P<field>(?:[^"]|\\")*)" by pattern "(?P<pattern>(?:[^"]|\\")*)" from mail body$/
-     */
-    public function iFillInFromMailValue($field, $pattern)
-    {
-        $matches = $this->getMail()->findBodyMatches($pattern);
-
-        if (empty($matches)) {
-            throw new MessageException(sprintf('Not matches for pattern "%s"', $pattern), $this->getMail());
-        }
-
-        return new Step\Given(sprintf('fill in "%s" with "%s"', $field, $matches[1]));
-    }
-
-    /**
-     * @Then /^(?:|I )should see "([^"]*)" base sender address$/
-     * @Then /^(?:|я )должен видеть в адресе письма "([^"]*)"$/
-     */
-    public function iShouldSeeServerAddressInFrom($arg1)
-    {
-        return array(
-            new Step\When(sprintf('should see "%s" as reply address in mail message', $this->getMailAgentParameter('baseAddress'))),
-            new Step\When(sprintf('should see "%s" as reply address in mail message', $arg1))
-        );
-    }
-
-    /**
-     * @Given /^(?:|я )должен видеть в письме время часового пояса "([^"]*)" через (\d+) (?:дней|дня|день)$/
-     */
-    public function iShouldSeeCurrentHourInMail($arg1, $arg2)
-    {
-        $date = (new \DateTime($arg1))->modify("+$arg2 days")->format('d.m.Y H:');
-
-        return new Step\When(sprintf('should see "%s" in mail message', $date));
-    }
-
-    /**
-     * @Given /^(?:|я )отправляю ответ с текстом:$/
-     */
-    public function iReplyWithTextMessage(PyStringNode $pystring)
-    {
-        return new Step\Given('отправляю ответ с текстом "' . $pystring->getRaw() . '"');
     }
 
     /**

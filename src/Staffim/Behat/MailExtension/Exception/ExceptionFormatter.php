@@ -8,7 +8,8 @@ interface ExceptionFormatter {
     /**
      * @param String $message
      * @param \Staffim\Behat\MailExtension\Message $mail
-     * @return mixed
+     *
+     * @return string
      */
     function __invoke($message, Message $mail);
 }

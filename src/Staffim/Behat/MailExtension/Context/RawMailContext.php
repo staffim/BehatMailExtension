@@ -2,25 +2,17 @@
 
 namespace Staffim\Behat\MailExtension\Context;
 
-use Behat\Behat\Context\Step;
-use Behat\Behat\Context\BehatContext;
-use Behat\Behat\Context\TranslatedContextInterface;
-use Behat\Behat\Event\ScenarioEvent;
-use Behat\Behat\Event\StepEvent;
+use Behat\Behat\Context\TranslatableContext;
+use Behat\Behat\Hook\Scope\AfterScenarioScope;
+use Behat\Testwork\Tester\Result\TestResult;
 use Staffim\Behat\MailExtension\Account;
 use Staffim\Behat\MailExtension\Context\MailAwareInterface;
 use Staffim\Behat\MailExtension\Exception\MailboxException;
 use Staffim\Behat\MailExtension\MailAgent;
 use Staffim\Behat\MailExtension\Message;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
-class RawMailContext extends BehatContext implements MailAwareInterface, TranslatedContextInterface
+class RawMailContext implements MailAwareInterface, TranslatableContext
 {
-    public function getTranslationResources()
-    {
-        return glob(__DIR__ . '/../../../../../i18n/ru.xliff');
-    }
-
     /**
      * @var MailAgent
      */
@@ -35,6 +27,11 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
      * @var Message
      */
     private $mail;
+
+    public static function getTranslationResources()
+    {
+        return glob(__DIR__ . '/../../../../../i18n/ru.xliff');
+    }
 
     /**
      * @param MailAgent $mailAgent
@@ -72,26 +69,15 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
     }
 
     /**
-     * Return parameters provided for MailAgent.
-     *
-     * @return array $parameters
-     */
-    public function getMailAgentParameters()
-    {
-        return $this->mailAgentParameters;
-    }
-
-    /**
-     * Return parameters provided for MailAgent.
+     * Return parameter provided for MailAgent.
      *
      * @param string $key
-     * @throws \Symfony\Component\Config\Definition\Exception\Exception
-     * @return mixed $parameter
+     * @return mixed
      */
     public function getMailAgentParameter($key)
     {
-        if (!isset($this->mailAgentParameters[$key])) {
-            throw new Exception("Parameter doesn't exist");
+        if (!array_key_exists($key, $this->mailAgentParameters)) {
+            throw new \InvalidArgumentException("Parameter doesn't exist");
         }
 
         return $this->mailAgentParameters[$key];
@@ -99,27 +85,37 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
 
     /**
      * @AfterScenario
+     *
+     * @param AfterScenarioScope $event
      */
-    public function saveMailMessageAfterFail(ScenarioEvent $event) {
-        if ($this->getMailAgentParameter('failedMailDir') && ($event->getResult() === StepEvent::FAILED) && $this->getMail()) {
+    public function saveMailMessageAfterFail(AfterScenarioScope $event) {
+        if (
+            $this->getMailAgentParameter('failed_mail_dir')
+            && ($event->getTestResult()->getResultCode() === TestResult::FAILED)
+            && $this->getMail()
+        ) {
             $scenario = $event->getScenario();
 
+            // FIXME Repair this code for Behat 3.
             $eventTitle = explode('features/', $scenario->getFile() . ':' . $scenario->getLine())[1];
             $eventTitle = str_replace(['/', '\\'], '.', $eventTitle);
 
             $mailTo = $this->getMail()->getTo();
             $fileName = $eventTitle . $mailTo[0] . ':' . str_replace(['/', '\\'], '.', $this->getMail()->getSubject() . '.html');
 
-            file_put_contents($this->getMailAgentParameter('failedMailDir') . $fileName, $this->getMail()->getRawParsedMessage());
+            file_put_contents($this->getMailAgentParameter('failed_mail_dir') . $fileName, $this->getMail()->getRawParsedMessage());
         }
     }
 
     /**
      * @When /^(?:|I )sign in to "(?P<mailServer>[^"]*)" smtp server with "(?P<login>[^"]*)" and "(?P<password>[^"]*)"$/
      */
+    // TODO Refactor: extract port to separate parameter, think about whole step.
     public function iSignInToSmtpServer($mailServer, $login, $password)
     {
-        $smtpAccount = new Account($mailServer, $login, $password);
+        list($mailServer, $port) = explode(':', $mailServer) + [null, null];
+
+        $smtpAccount = new Account($mailServer, $port, $login, $password);
         $this->getMailAgent()->connectSmtpServer($smtpAccount);
     }
 
@@ -146,7 +142,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
     public function iReplyWithMessage($text, $filename = null)
     {
         if ($filename) {
-            $filename = $this->getMailAgentParameter('filesPath') . $filename;
+            $filename = $this->getMailAgentParameter('files_path') . $filename;
         }
         $replyMail = $this->getMailAgent()->createReplyMessage($this->getMail()->getRawMail(), $text, $filename);
         $this->getMailAgent()->send($replyMail);
@@ -166,7 +162,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
      */
     public function iSendMailFromFile($filename)
     {
-        $mail = $this->getMailAgent()->createMessageFromFile($this->getMailAgentParameter('filesPath') . $filename);
+        $mail = $this->getMailAgent()->createMessageFromFile($this->getMailAgentParameter('files_path') . $filename);
         $this->getMailAgent()->send($mail);
     }
 
@@ -175,7 +171,7 @@ class RawMailContext extends BehatContext implements MailAwareInterface, Transla
      */
     public function iReplyWithMessageFromFile($filename)
     {
-        $mail = $this->getMailAgent()->createReplyMessageFromFile($this->getMail()->getRawMail(), $this->getMailAgentParameter('filesPath') . $filename);
+        $mail = $this->getMailAgent()->createReplyMessageFromFile($this->getMail()->getRawMail(), $this->getMailAgentParameter('files_path') . $filename);
         $this->getMailAgent()->send($mail);
     }
 

@@ -2,8 +2,6 @@
 
 namespace Staffim\Behat\MailExtension;
 
-use Staffim\Behat\MailExtension\Mailbox;
-
 class MailAgent implements MailAgentInterface
 {
     /**
@@ -61,7 +59,6 @@ class MailAgent implements MailAgentInterface
         $this->pop3Account = $pop3Account;
         $this->smtpAccount = $smtpAccount;
 
-        $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
         $this->mailParser = new \ezcMailParser();
     }
 
@@ -73,22 +70,24 @@ class MailAgent implements MailAgentInterface
         $this->disconnectSmtp();
 
         $smtpAccount = $smtpAccount ? $smtpAccount: $this->smtpAccount;
-        $this->smtpTransport = new \ezcMailSmtpTransport($smtpAccount->getServerName(), $smtpAccount->getLogin(), $smtpAccount->getPassword());
+        $this->smtpTransport = new \ezcMailSmtpTransport(
+            $smtpAccount->getServerName(),
+            $smtpAccount->getLogin(),
+            $smtpAccount->getPassword(),
+            $smtpAccount->getPort()
+        );
     }
 
-    /**
-     * @param AccountInterface $pop3Account
-     */
-    public function connectPop3Server(AccountInterface $pop3Account = null)
+    // TODO Refactor to getPop3Transport().
+    private function connectPop3Server()
     {
         $this->disconnectPop3();
 
-        $pop3Account = $pop3Account ? $pop3Account: $this->pop3Account;
-        $this->pop3Transport = new \ezcMailPop3Transport($pop3Account->getServerName());
-        $this->pop3Transport->authenticate($pop3Account->getLogin(), $pop3Account->getPassword());
+        $this->pop3Transport = new \ezcMailPop3Transport($this->pop3Account->getServerName(), $this->pop3Account->getPort());
+        $this->pop3Transport->authenticate($this->pop3Account->getLogin(), $this->pop3Account->getPassword());
     }
 
-    public function disconnectSmtp()
+    private function disconnectSmtp()
     {
         try {
             if ($this->smtpTransport) {
@@ -99,7 +98,7 @@ class MailAgent implements MailAgentInterface
         }
     }
 
-    public function disconnectPop3()
+    private function disconnectPop3()
     {
         try {
             if ($this->pop3Transport) {
@@ -136,6 +135,7 @@ class MailAgent implements MailAgentInterface
     public function size()
     {
         $this->connectPop3Server();
+
         $this->pop3Transport->status($dummy, $sizeMail);
 
         return $sizeMail;
@@ -147,6 +147,7 @@ class MailAgent implements MailAgentInterface
     public function number()
     {
         $this->connectPop3Server();
+
         $this->pop3Transport->status($numMail, $dummy);
 
         return $numMail;
@@ -155,7 +156,7 @@ class MailAgent implements MailAgentInterface
     /**
      * @param Mailbox $mailbox
      */
-    public function setMailbox($mailbox)
+    public function setMailbox(Mailbox $mailbox)
     {
         $this->mailbox = $mailbox;
     }
@@ -206,6 +207,7 @@ class MailAgent implements MailAgentInterface
     public function RemoveMessagesFromServer()
     {
         $this->connectPop3Server();
+
         $count = $this->number();
         for ($numMessage = 1; $numMessage <= $count; $numMessage++) {
             $this->pop3Transport->delete($numMessage);

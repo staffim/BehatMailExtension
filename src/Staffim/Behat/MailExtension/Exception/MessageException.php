@@ -2,7 +2,6 @@
 
 namespace Staffim\Behat\MailExtension\Exception;
 
-use Behat\Mink\Exception\Exception;
 use Staffim\Behat\MailExtension\Message;
 
 class MessageException extends Exception
@@ -30,12 +29,12 @@ class MessageException extends Exception
     /**
      * Initializes exception.
      *
-     * @param string $message   optional message
+     * @param string $message Optional.
      * @param \Staffim\Behat\MailExtension\Message $mailMessage
      * @param ExceptionFormatter $formatter
-     * @param Exception $exception
+     * @param \Exception $exception
      */
-    public function __construct($message = null, Message $mailMessage, ExceptionFormatter $formatter = null, Exception $exception = null)
+    public function __construct($message = null, Message $mailMessage, ExceptionFormatter $formatter = null, \Exception $exception = null)
     {
         $this->mailMessage = $mailMessage;
         $this->formatter = $formatter ?: new BaseExceptionFormatter;
@@ -52,9 +51,9 @@ class MessageException extends Exception
     {
         try {
             $formatter = $this->formatter;
-            $string = $formatter($this->getMessage(), $this->getMailMessage());
+            $string = (string)$formatter($this->getMessage(), $this->getMailMessage());
         } catch (\Exception $e) {
-            return $this->getMessage();
+            $string = $this->getMessage();
         }
 
         return $string;

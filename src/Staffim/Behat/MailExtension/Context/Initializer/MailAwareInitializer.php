@@ -2,33 +2,38 @@
 
 namespace Staffim\Behat\MailExtension\Context\Initializer;
 
-use Behat\Behat\Context\ContextInterface;
-use Behat\Behat\Context\Initializer\InitializerInterface;
-
+use Behat\Behat\Context\Context;
+use Behat\Behat\Context\Initializer\ContextInitializer;
 use Staffim\Behat\MailExtension\Account;
 use Staffim\Behat\MailExtension\Context\MailAwareInterface;
 use Staffim\Behat\MailExtension\MailAgent;
 
-class MailAwareInitializer implements InitializerInterface
+class MailAwareInitializer implements ContextInitializer
 {
     private $mailAgent;
     private $parameters;
 
     public function __construct(array $parameters)
     {
-        $pop3Account = new Account($parameters['pop3Server'], $parameters['pop3Auth']['login'], $parameters['pop3Auth']['password']);
-        $smtpAccount = new Account($parameters['smtpServer'], $parameters['smtpAuth']['login'], $parameters['smtpAuth']['password']);
-        $this->mailAgent = new MailAgent($pop3Account, $smtpAccount);
         $this->parameters = $parameters;
+
+        $pop3Account = new Account($parameters['pop3_host'], $parameters['pop3_port'], $parameters['pop3_user'], $parameters['pop3_password']);
+        $smtpAccount = new Account($parameters['smtp_host'], $parameters['smtp_port'], $parameters['smtp_user'], $parameters['smtp_password']);
+
+        $this->mailAgent = new MailAgent($pop3Account, $smtpAccount);
     }
 
-    public function supports(ContextInterface $context)
+    /**
+     * Initializes provided context.
+     *
+     * @param Context $context
+     */
+    public function initializeContext(Context $context)
     {
-        return ($context instanceof MailAwareInterface);
-    }
+        if (!$context instanceof MailAwareInterface) {
+            return;
+        }
 
-    public function initialize(ContextInterface $context)
-    {
         $context->setMailAgent($this->mailAgent);
         $context->setMailAgentParameters($this->parameters);
     }
