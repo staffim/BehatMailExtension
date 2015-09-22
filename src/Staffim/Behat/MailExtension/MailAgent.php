@@ -2,6 +2,12 @@
 
 namespace Staffim\Behat\MailExtension;
 
+use ArrayObject;
+use ezcMail;
+
+use function iter\rewindable\map;
+use function iter\rewindable\filter;
+
 class MailAgent implements MailAgentInterface
 {
     /**
@@ -20,7 +26,7 @@ class MailAgent implements MailAgentInterface
     private $mailParser;
 
     /**
-     * @var Mailbox
+     * @var ArrayObject
      */
     private $mailbox;
 
@@ -35,36 +41,37 @@ class MailAgent implements MailAgentInterface
     private $smtpAccount;
 
     /**
-     * @param AccountInterface $pop3Account
-     * @param AccountInterface $smtpAccount
+     * @var bool
      */
-    public function __construct(AccountInterface $pop3Account, AccountInterface $smtpAccount = null)
+    private $keepMailOnServer = true;
+
+    /**
+     * @param Account $pop3Account
+     * @param Account $smtpAccount
+     */
+    public function __construct(Account $pop3Account, Account $smtpAccount = null)
     {
         $this->pop3Account = $pop3Account;
         $this->smtpAccount = $smtpAccount;
 
         $this->mailParser = new \ezcMailParser();
+
+        $this->mailbox = new ArrayObject();
+    }
+
+    public function removeMailAfterReceiving()
+    {
+        $this->keepMailOnServer = false;
+    }
+
+    public function keepMailOnServer()
+    {
+        $this->keepMailOnServer = true;
     }
 
     public function __destruct()
     {
         $this->disconnect();
-    }
-
-    /**
-     * @param Account $smtpAccount
-     */
-    public function setSmtpAccount($smtpAccount)
-    {
-        $this->smtpAccount = $smtpAccount;
-    }
-
-    /**
-     * @param Account $pop3Account
-     */
-    public function setPop3Account($pop3Account)
-    {
-        $this->pop3Account = $pop3Account;
     }
 
     public function disconnect()
@@ -73,33 +80,22 @@ class MailAgent implements MailAgentInterface
         $this->disconnectSmtp();
     }
 
-    public function size()
-    {
-        $this->connectPop3Server();
-
-        $this->pop3Transport->status($dummy, $sizeMail);
-
-        return $sizeMail;
-    }
-
     /**
      * @return mixed
      */
-    public function number()
+    // TODO Delete.
+    private function countMail()
     {
         $this->connectPop3Server();
 
-        $this->pop3Transport->status($numMail, $dummy);
+        $this->pop3Transport->status($mailNumber, $dummy);
 
-        return $numMail;
+        return $mailNumber;
     }
 
-    /**
-     * @param Mailbox $mailbox
-     */
-    public function setMailbox(Mailbox $mailbox)
+    private function getMessages()
     {
-        $this->mailbox = $mailbox;
+        return map(function ($mail) { return new Message($mail); }, $this->mailbox);
     }
 
     /**
@@ -107,29 +103,51 @@ class MailAgent implements MailAgentInterface
      */
     public function getMailbox()
     {
-        if (!$this->mailbox) {
-            $this->receive();
-        }
-
-        return $this->mailbox;
+        return new Mailbox($this, $this->getMessages());
     }
 
     /**
-     * Receive messages to mailbox
+     * @param string $address
      *
      * @return Mailbox
      */
-    public function receive()
+    public function getMailboxFor($address)
+    {
+        return new Mailbox($this, filter(x()->isFor($address), $this->getMessages()));
+    }
+
+    /**
+     * Retrieve new messages to mailbox
+     */
+    public function retrieve()
     {
         $this->connectPop3Server();
 
-        $mails = $this->pop3Transport->fetchAll();
+        $mails = $this->pop3Transport->fetchAll(!$this->keepMailOnServer);
         $mails = $this->mailParser->parseMail($mails);
 
-        $mailbox = new Mailbox($mails);
-        $this->setMailbox($mailbox);
+        $this->addToMailbox($mails);
+    }
 
-        return $mailbox;
+    private function addToMailbox($mails)
+    {
+        foreach ($mails as $mail) {
+            if (!$this->isMailAlreadyCopied($mail)) {
+                $this->mailbox->append($mail);
+            }
+        }
+    }
+
+    private function isMailAlreadyCopied(ezcMail $newMail)
+    {
+        /** @var ezcMail $mail */
+        foreach ($this->mailbox as $mail) {
+            if ($mail->messageId == $newMail->messageId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -145,25 +163,14 @@ class MailAgent implements MailAgentInterface
     /**
      * Remove messages only from server
      */
-    public function RemoveMessagesFromServer()
+    public function removeMailFromServer()
     {
         $this->connectPop3Server();
 
-        $count = $this->number();
+        $count = $this->countMail();
         for ($numMessage = 1; $numMessage <= $count; $numMessage++) {
             $this->pop3Transport->delete($numMessage);
         }
-
-        $this->pop3Transport->disconnect();
-    }
-
-    /**
-     * Remove messages from server and from mailbox
-     */
-    public function removeMessages()
-    {
-        $this->RemoveMessagesFromServer();
-        $this->mailbox = null;
     }
 
     /**
@@ -249,46 +256,25 @@ class MailAgent implements MailAgentInterface
     }
 
     /**
-     * Waits some time or number messages.
+     * Waits some time or number messages
      *
-     * @param integer $time      time in milliseconds
-     * @param integer $number
+     * @deprecated Use Mailbox::waitForSize() instead.
+     *
+     * @param integer $time Time in milliseconds.
+     * @param integer $size
      *
      * @return bool
      */
-    public function wait($time, $number = 0)
+    public function wait($time, $size = 0)
     {
-        $start = microtime(true);
-        $end = $start + $time / 1000.0;
-
-        do {
-            $result = (bool) ($number <= $this->number());
-            usleep(100000);
-        } while (microtime(true) < $end && !$result);
-
-        return (bool)$result;
+        return $this->getMailbox()->waitForSize($size, $time);
     }
 
-    /**
-     * @return \ezcMailSmtpTransport
-     */
-    public function getSmtpTransport()
-    {
-        if (!$this->smtpTransport) {
-            $this->connectSmtpServer();
-        }
-
-        return $this->smtpTransport;
-    }
-
-    /**
-     * @param AccountInterface $smtpAccount
-     */
-    public function connectSmtpServer(AccountInterface $smtpAccount = null)
+    private function connectSmtpServer()
     {
         $this->disconnectSmtp();
 
-        $smtpAccount = $smtpAccount ? $smtpAccount: $this->smtpAccount;
+        $smtpAccount = $this->smtpAccount;
         $this->smtpTransport = new \ezcMailSmtpTransport(
             $smtpAccount->getServerName(),
             $smtpAccount->getLogin(),
@@ -300,7 +286,12 @@ class MailAgent implements MailAgentInterface
         );
     }
 
-    // TODO Refactor to getPop3Transport().
+    public function setSmtpAccount(Account $account)
+    {
+        $this->disconnectSmtp();
+
+        $this->smtpAccount = $account;
+    }
 
     private function connectPop3Server()
     {
@@ -309,7 +300,7 @@ class MailAgent implements MailAgentInterface
         $this->pop3Transport = new \ezcMailPop3Transport(
             $this->pop3Account->getServerName(),
             $this->pop3Account->getPort(),
-            $this->pop3Account->isSecure() ? new \ezcMailPop3TransportOptions(['ssl' => true]) : null
+            $this->pop3Account->isSecure() ? new \ezcMailPop3TransportOptions(['ssl' => true]) : []
         );
         $this->pop3Transport->authenticate($this->pop3Account->getLogin(), $this->pop3Account->getPassword());
     }

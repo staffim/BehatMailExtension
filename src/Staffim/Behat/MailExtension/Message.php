@@ -2,22 +2,24 @@
 
 namespace Staffim\Behat\MailExtension;
 
+use ezcMail;
+
 class Message
 {
     /**
-     *  @var \ezcMail
+     *  @var ezcMail
      */
     private $mail;
 
     /**
-     * @return \ezcMail
+     * @return ezcMail
      */
     public function getRawMail()
     {
         return $this->mail;
     }
 
-    public function __construct($mail)
+    public function __construct(ezcMail $mail)
     {
         $this->mail = $mail;
     }
@@ -79,6 +81,16 @@ class Message
             };
         }
         return false;
+    }
+
+    /**
+     * @param string $address
+     *
+     * @return bool
+     */
+    public function isFor($address)
+    {
+        return $this->findInTo($address);
     }
 
     /**

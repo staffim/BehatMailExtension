@@ -21,10 +21,13 @@
         }
     ],
     "require":     {
-        "php":                  ">=5.4.0",
-        "behat/behat":          "~3.0",
-        "zetacomponents/mail":  "~1.8",
-        "alexeyshockov/colada": "~1.0"
+        "php":                     "~5.6",
+        "behat/behat":             "~3.0",
+        "zetacomponents/mail":     "*",
+        "lstrojny/functional-php": "dev-master",
+        "alexeyshockov/colada-x":  "dev-master",
+        "phpoption/phpoption":     "~1.5",
+        "nikic/iter":              "~1.2"
     },
     "require-dev": {
         "phpspec/phpspec": "~2.3"

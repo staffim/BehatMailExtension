@@ -2,7 +2,7 @@
 
 namespace Staffim\Behat\MailExtension;
 
-class Account implements AccountInterface
+class Account
 {
     /**
      * @var string

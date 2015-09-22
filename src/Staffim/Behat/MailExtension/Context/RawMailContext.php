@@ -5,7 +5,9 @@ namespace Staffim\Behat\MailExtension\Context;
 use Behat\Behat\Context\TranslatableContext;
 use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Testwork\Tester\Result\TestResult;
+use InvalidArgumentException;
 use Staffim\Behat\MailExtension\MailAgent;
+use Staffim\Behat\MailExtension\Mailbox;
 use Staffim\Behat\MailExtension\Message;
 
 class RawMailContext implements MailAwareInterface, TranslatableContext
@@ -24,6 +26,11 @@ class RawMailContext implements MailAwareInterface, TranslatableContext
      * @var Message
      */
     protected $mail;
+
+    /**
+     * @var Mailbox
+     */
+    protected $mailbox;
 
     public static function getTranslationResources()
     {
@@ -50,17 +57,9 @@ class RawMailContext implements MailAwareInterface, TranslatableContext
     }
 
     /**
-     * @param Message $mail
-     */
-    public function setMail($mail)
-    {
-        $this->mail = $mail;
-    }
-
-    /**
      * @return MailAgent
      */
-    public function getMailAgent()
+    protected function getMailAgent()
     {
         return $this->mailAgent;
     }
@@ -68,21 +67,37 @@ class RawMailContext implements MailAwareInterface, TranslatableContext
     /**
      * @return Message
      */
-    public function getMail()
+    // TODO Use Option here.
+    protected function getMail()
     {
         return $this->mail;
     }
 
     /**
+     * @return Mailbox
+     */
+    protected function getMailbox()
+    {
+        if (!$this->mailbox) {
+            $this->mailbox = $this->mailAgent->getMailbox();
+        }
+
+        return $this->mailbox;
+    }
+
+    /**
      * Return parameter provided for MailAgent.
      *
+     * @throws InvalidArgumentException
+     *
      * @param string $key
+     *
      * @return mixed
      */
     public function getMailAgentParameter($key)
     {
         if (!array_key_exists($key, $this->mailAgentParameters)) {
-            throw new \InvalidArgumentException("Parameter doesn't exist");
+            throw new InvalidArgumentException("Parameter doesn't exist");
         }
 
         return $this->mailAgentParameters[$key];
@@ -101,7 +116,7 @@ class RawMailContext implements MailAwareInterface, TranslatableContext
         ) {
             $scenario = $event->getScenario();
 
-            // FIXME Repair this code for Behat 3.
+            // TODO Repair this code for Behat 3.
             $eventTitle = explode('features/', $scenario->getFile() . ':' . $scenario->getLine())[1];
             $eventTitle = str_replace(['/', '\\'], '.', $eventTitle);
 

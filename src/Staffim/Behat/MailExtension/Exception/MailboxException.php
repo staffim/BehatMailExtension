@@ -43,7 +43,7 @@ class MailboxException extends Exception
     public function __toString()
     {
         try {
-            $mailboxList = $this->trimString($this->getMailbox()->getMailFromToSubject());
+            $mailboxList = $this->getMailbox()->getMailFromToSubject();
             $string = sprintf("%s\n\nMail messages:\n%s",
                 $this->getMessage(),
                 $this->pipeString($mailboxList."\n")
@@ -53,5 +53,18 @@ class MailboxException extends Exception
         }
 
         return $string;
+    }
+
+    /**
+     * Prepends every line in a string with pipe (|).
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    // TODO Remove.
+    protected function pipeString($string)
+    {
+        return '|  ' . strtr($string, array("\n" => "\n|  "));
     }
 }

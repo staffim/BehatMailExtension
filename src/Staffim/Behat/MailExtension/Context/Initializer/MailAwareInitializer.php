@@ -11,6 +11,7 @@ use Staffim\Behat\MailExtension\MailAgent;
 class MailAwareInitializer implements ContextInitializer
 {
     private $mailAgent;
+
     private $parameters;
 
     public function __construct(array $parameters)
