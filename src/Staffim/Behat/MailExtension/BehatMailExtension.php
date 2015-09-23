@@ -61,10 +61,12 @@ class BehatMailExtension implements ExtensionInterface
         $builder->scalarNode('pop3_port')->defaultValue(110);
         $builder->scalarNode('pop3_user')->defaultValue('anonymous');
         $builder->scalarNode('pop3_password')->defaultValue('');
+        $builder->scalarNode('pop3_secure')->defaultValue(true);
         $builder->scalarNode('smtp_host')->defaultValue(null);
         $builder->scalarNode('smtp_port')->defaultValue(25);
         $builder->scalarNode('smtp_user')->defaultValue('');
         $builder->scalarNode('smtp_password')->defaultValue('');
+        $builder->scalarNode('smtp_secure')->defaultValue(true);
         $builder->scalarNode('max_duration')->defaultValue(3000);
         $builder->scalarNode('failed_mail_dir')->defaultValue(null);
         $builder->scalarNode('files_path')->defaultValue(null);

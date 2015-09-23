@@ -30,25 +30,9 @@ class MailAgent implements MailAgentInterface
     private $pop3Account;
 
     /**
-     * @param Account $pop3Account
-     */
-    public function setPop3Account($pop3Account)
-    {
-        $this->pop3Account = $pop3Account;
-    }
-
-    /**
      * @var Account
      */
     private $smtpAccount;
-
-    /**
-     * @param Account $smtpAccount
-     */
-    public function setSmtpAccount($smtpAccount)
-    {
-        $this->smtpAccount = $smtpAccount;
-    }
 
     /**
      * @param AccountInterface $pop3Account
@@ -62,74 +46,31 @@ class MailAgent implements MailAgentInterface
         $this->mailParser = new \ezcMailParser();
     }
 
-    /**
-     * @param AccountInterface $smtpAccount
-     */
-    public function connectSmtpServer(AccountInterface $smtpAccount = null)
-    {
-        $this->disconnectSmtp();
-
-        $smtpAccount = $smtpAccount ? $smtpAccount: $this->smtpAccount;
-        $this->smtpTransport = new \ezcMailSmtpTransport(
-            $smtpAccount->getServerName(),
-            $smtpAccount->getLogin(),
-            $smtpAccount->getPassword(),
-            $smtpAccount->getPort()
-        );
-    }
-
-    // TODO Refactor to getPop3Transport().
-    private function connectPop3Server()
-    {
-        $this->disconnectPop3();
-
-        $this->pop3Transport = new \ezcMailPop3Transport($this->pop3Account->getServerName(), $this->pop3Account->getPort());
-        $this->pop3Transport->authenticate($this->pop3Account->getLogin(), $this->pop3Account->getPassword());
-    }
-
-    private function disconnectSmtp()
-    {
-        try {
-            if ($this->smtpTransport) {
-                $this->smtpTransport->disconnect();
-            }
-        } catch (\ezcMailTransportException $e) {
-            // Ignore transport exceptions.
-        }
-    }
-
-    private function disconnectPop3()
-    {
-        try {
-            if ($this->pop3Transport) {
-                $this->pop3Transport->disconnect();
-            }
-        } catch (\ezcMailTransportException $e) {
-            // Ignore transport exceptions.
-        }
-    }
-
-    public function disconnect()
-    {
-        $this->disconnectPop3();
-        $this->disconnectSmtp();
-    }
-
     public function __destruct()
     {
         $this->disconnect();
     }
 
     /**
-     * @return \ezcMailSmtpTransport
+     * @param Account $smtpAccount
      */
-    public function getSmtpTransport()
+    public function setSmtpAccount($smtpAccount)
     {
-        if (!$this->smtpTransport) {
-            $this->connectSmtpServer();
-        }
+        $this->smtpAccount = $smtpAccount;
+    }
 
-        return $this->smtpTransport;
+    /**
+     * @param Account $pop3Account
+     */
+    public function setPop3Account($pop3Account)
+    {
+        $this->pop3Account = $pop3Account;
+    }
+
+    public function disconnect()
+    {
+        $this->disconnectPop3();
+        $this->disconnectSmtp();
     }
 
     public function size()
@@ -326,5 +267,72 @@ class MailAgent implements MailAgentInterface
         } while (microtime(true) < $end && !$result);
 
         return (bool)$result;
+    }
+
+    /**
+     * @return \ezcMailSmtpTransport
+     */
+    public function getSmtpTransport()
+    {
+        if (!$this->smtpTransport) {
+            $this->connectSmtpServer();
+        }
+
+        return $this->smtpTransport;
+    }
+
+    /**
+     * @param AccountInterface $smtpAccount
+     */
+    public function connectSmtpServer(AccountInterface $smtpAccount = null)
+    {
+        $this->disconnectSmtp();
+
+        $smtpAccount = $smtpAccount ? $smtpAccount: $this->smtpAccount;
+        $this->smtpTransport = new \ezcMailSmtpTransport(
+            $smtpAccount->getServerName(),
+            $smtpAccount->getLogin(),
+            $smtpAccount->getPassword(),
+            $smtpAccount->getPort(),
+            $smtpAccount->isSecure() ? new \ezcMailSmtpTransportOptions([
+                'connectionType' => \ezcMailSmtpTransport::CONNECTION_SSL
+            ]) : null
+        );
+    }
+
+    // TODO Refactor to getPop3Transport().
+
+    private function connectPop3Server()
+    {
+        $this->disconnectPop3();
+
+        $this->pop3Transport = new \ezcMailPop3Transport(
+            $this->pop3Account->getServerName(),
+            $this->pop3Account->getPort(),
+            $this->pop3Account->isSecure() ? new \ezcMailPop3TransportOptions(['ssl' => true]) : null
+        );
+        $this->pop3Transport->authenticate($this->pop3Account->getLogin(), $this->pop3Account->getPassword());
+    }
+
+    private function disconnectSmtp()
+    {
+        try {
+            if ($this->smtpTransport) {
+                $this->smtpTransport->disconnect();
+            }
+        } catch (\ezcMailTransportException $e) {
+            // Ignore transport exceptions.
+        }
+    }
+
+    private function disconnectPop3()
+    {
+        try {
+            if ($this->pop3Transport) {
+                $this->pop3Transport->disconnect();
+            }
+        } catch (\ezcMailTransportException $e) {
+            // Ignore transport exceptions.
+        }
     }
 }

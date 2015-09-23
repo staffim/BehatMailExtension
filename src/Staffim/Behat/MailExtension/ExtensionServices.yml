@@ -5,10 +5,12 @@ parameters:
   behat.mail_extension.pop3_port: ~
   behat.mail_extension.pop3_user: ~
   behat.mail_extension.pop3_password: ~
+  behat.mail_extension.pop3_secure: ~
   behat.mail_extension.smtp_host: ~
   behat.mail_extension.smtp_port: ~
   behat.mail_extension.smtp_user: ~
   behat.mail_extension.smtp_password: ~
+  behat.mail_extension.smtp_secure: ~
 services:
   behat.mail_extension.mail_agent:
     class: %behat.mail_extension.mail_agent.class%

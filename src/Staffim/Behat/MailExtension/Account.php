@@ -25,17 +25,24 @@ class Account implements AccountInterface
     private $password;
 
     /**
+     * @var bool
+     */
+    private $secure;
+
+    /**
      * @param string $server
      * @param int $port
      * @param string $login
      * @param string $password
+     * @param bool $secure
      */
-    public function __construct($server, $port, $login = '', $password = '')
+    public function __construct($server, $port, $login = '', $password = '', $secure = true)
     {
         $this->server = $server;
         $this->port = $port;
         $this->login = $login;
         $this->password = $password;
+        $this->secure = $secure;
     }
 
     /**
@@ -68,5 +75,13 @@ class Account implements AccountInterface
     public function getPassword()
     {
         return $this->password;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSecure()
+    {
+        return $this->secure;
     }
 }
