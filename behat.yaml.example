@@ -1,0 +1,15 @@
+default:
+  extensions:
+    Staffim\Behat\MailExtension\BehatMailExtension:
+      smtp_host: "mailtrap.io"
+      smtp_port: "2525"
+      smtp_user: ""
+      smtp_password: ""
+      pop3_host: "mailtrap.io"
+      pop3_port: "9950"
+      pop3_user: ""
+      pop3_password: ""
+  suites:
+    default:
+      contexts:
+        - Staffim\Behat\MailExtension\Context\MailContext

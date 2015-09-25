@@ -17,8 +17,20 @@ class MailAwareInitializer implements ContextInitializer
     {
         $this->parameters = $parameters;
 
-        $pop3Account = new Account($parameters['pop3_host'], $parameters['pop3_port'], $parameters['pop3_user'], $parameters['pop3_password']);
-        $smtpAccount = new Account($parameters['smtp_host'], $parameters['smtp_port'], $parameters['smtp_user'], $parameters['smtp_password']);
+        $pop3Account = new Account(
+            $parameters['pop3_host'],
+            $parameters['pop3_port'],
+            $parameters['pop3_user'],
+            $parameters['pop3_password'],
+            $parameters['pop3_secure']
+        );
+        $smtpAccount = new Account(
+            $parameters['smtp_host'],
+            $parameters['smtp_port'],
+            $parameters['smtp_user'],
+            $parameters['smtp_password'],
+            $parameters['smtp_secure']
+        );
 
         $this->mailAgent = new MailAgent($pop3Account, $smtpAccount);
     }

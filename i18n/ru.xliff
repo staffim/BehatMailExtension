@@ -30,6 +30,10 @@
             <source><![CDATA[/^(?:|I )send mail with subject "(?P<subject>(?:[^"]|\\")*)" and body "(?P<body>(?:[^"]|\\")*)" to address "(?P<to>(?:[^"]|\\")*)" from "(?P<from>(?:[^"]|\\")*)"$/]]></source>
             <target><![CDATA[/^(?:|я )отправляю письмо с темой "(?P<subject>(?:[^"]|\\")*)" и текстом "(?P<body>(?:[^"]|\\")*)" по адресу "(?P<to>(?:[^"]|\\")*)" от "(?P<from>(?:[^"]|\\")*)"$/]]></target>
         </trans-unit>
+        <trans-unit id="iReplyWithTextMessage">
+            <source><![CDATA[/^(?:|I )reply with:$/]]></source>
+            <target><![CDATA[/^(?:|я )отправляю ответ:$/]]></target>
+        </trans-unit>
         <trans-unit id="iSendMailFromFile">
             <source><![CDATA[/^(?:|I )send mail from file "(?P<filename>(?:[^"]|\\")*)"$/]]></source>
             <target><![CDATA[/^(?:|я )отправляю письмо из файла "(?P<filename>(?:[^"]|\\")*)"$/]]></target>
@@ -85,6 +89,10 @@
         <trans-unit id="iShouldSeeAttachment">
             <source><![CDATA[/^(?:|I )should see attachment "(?P<text>(?:[^"]|\\")*)" in mail message$/]]></source>
             <target><![CDATA[/^(?:|я )должен видеть прикрепленный к письму файл "(?P<text>(?:[^"]|\\")*)"$/]]></target>
+        </trans-unit>
+        <trans-unit id="iShouldSeeTheDateAfterInFormat">
+            <source><![CDATA[/^(?:|I )should see the date after "([^"]*)" in "([^"]*)" format$/]]></source>
+            <target><![CDATA[/^(?:|я )должен видеть дату через "([^"]*)" в формате "([^"]*)"/]]></target>
         </trans-unit>
         <trans-unit id="iFollowLinkInMailMessage">
             <source><![CDATA[/^(?:|I )follow "(?P<linkPattern>(?:[^"]|\\")*)" from mail message$/]]></source>
