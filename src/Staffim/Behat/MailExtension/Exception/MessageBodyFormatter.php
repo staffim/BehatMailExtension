@@ -6,19 +6,18 @@ use Staffim\Behat\MailExtension\Message;
 
 class MessageBodyFormatter extends BaseExceptionFormatter
 {
-
     /**
-     * @param string $message
-     * @param \Staffim\Behat\MailExtension\Message $mail
+     * @param string $text
+     * @param Message $message
      *
      * @return string
      */
-    public function __invoke($message, Message $mail)
+    public function __invoke($text, Message $message)
     {
-        $mailBody = $this->trimString($mail->getBody());
+        $mailBody = $this->trimString($message->getBody());
 
-        return sprintf("%s\n\nMail body:\n%s",
-            $message,
+        return sprintf("%s\n\nMail message body:\n%s",
+            $text,
             $this->pipeString($mailBody."\n")
         );
     }

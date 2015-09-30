@@ -12,7 +12,6 @@ interface MailAwareInterface extends Context
 {
     /**
      * @param MailAgent $mailAgent
-     * @return mixed
      */
     public function setMailAgent(MailAgent $mailAgent);
 

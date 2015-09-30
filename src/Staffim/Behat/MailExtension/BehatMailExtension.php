@@ -67,6 +67,7 @@ class BehatMailExtension implements ExtensionInterface
         $builder->scalarNode('smtp_user')->defaultValue('');
         $builder->scalarNode('smtp_password')->defaultValue('');
         $builder->scalarNode('smtp_secure')->defaultValue(false);
+        // 10 seconds.
         $builder->scalarNode('max_duration')->defaultValue(10000);
         $builder->scalarNode('failed_mail_dir')->defaultValue(null);
         $builder->scalarNode('files_path')->defaultValue(null);

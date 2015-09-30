@@ -2,14 +2,14 @@
     "name":        "staffim/behat-mail-extension",
     "type":        "library",
     "description": "Behat extension for testing mail communications.",
-    "keywords":    ["Behat", "BDD", "mail"],
+    "keywords":    ["Behat", "BDD", "mail", "POP3", "SMTP"],
     "homepage":    "http://github.com/staffim/BehatMailExtension",
     "license":     "MIT",
-    "support":     {
+    "support": {
         "issues": "https://github.com/staffim/BehatMailExtension/issues",
         "wiki":   "https://github.com/staffim/BehatMailExtension/wiki"
     },
-    "authors":     [
+    "authors": [
         {
             "name":  "Andrey Fureev",
             "email": "a.fureev@staffim.ru"
@@ -20,13 +20,19 @@
             "homepage": "http://alexey.shockov.com/"
         }
     ],
-    "require":     {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:alexeyshockov/Mail.git"
+        }
+    ],
+    "require": {
         "php":                     "~5.6",
         "behat/behat":             "~3.0",
-        "zetacomponents/mail":     "*",
-        "lstrojny/functional-php": "dev-master",
-        "alexeyshockov/colada-x":  "dev-master",
-        "phpoption/phpoption":     "~1.5",
+        "zetacomponents/mail":     "dev-pop3-line-endings",
+        "lstrojny/functional-php": "~1.0@dev",
+        "alexeyshockov/colada-x":  "*@dev",
+        "phpoption/phpoption":     "~1.4",
         "nikic/iter":              "~1.2"
     },
     "require-dev": {
@@ -35,7 +41,12 @@
     "suggest": {
         "behat/mink-extension": "To interact with web pages"
     },
-    "autoload":    {
-        "psr-0": { "Staffim\\Behat\\MailExtension": "src/" }
+    "autoload": {
+        "psr-4": {
+            "Staffim\\Behat\\MailExtension\\": "src/Staffim/Behat/MailExtension"
+        },
+        "files": [
+            "src/functions.php"
+        ]
     }
 }

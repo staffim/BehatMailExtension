@@ -2,44 +2,42 @@
 
 namespace Staffim\Behat\MailExtension\Exception;
 
+use Exception;
+use Staffim\Behat\MailExtension\Exception\Exception as BaseException;
 use Staffim\Behat\MailExtension\Message;
 
-class MessageException extends Exception
+class MessageException extends BaseException
 {
     /**
-     * Mail message instance.
-     *
-     * @var \Staffim\Behat\MailExtension\Message
+     * @var Message
      */
     protected $mailMessage;
 
     /**
-     * @var ExceptionFormatter
+     * @var callable
      */
     private $formatter;
 
     /**
-     * @return \Staffim\Behat\MailExtension\Message
+     * @param string $message
+     * @param Message $mailMessage
+     * @param callable $formatter
+     * @param Exception $exception
      */
-    public function getMailMessage()
-    {
-        return $this->mailMessage;
-    }
-
-    /**
-     * Initializes exception.
-     *
-     * @param string $message Optional.
-     * @param \Staffim\Behat\MailExtension\Message $mailMessage
-     * @param ExceptionFormatter $formatter
-     * @param \Exception $exception
-     */
-    public function __construct($message = null, Message $mailMessage, ExceptionFormatter $formatter = null, \Exception $exception = null)
+    public function __construct($message, Message $mailMessage, $formatter = null, Exception $exception = null)
     {
         $this->mailMessage = $mailMessage;
         $this->formatter = $formatter ?: new BaseExceptionFormatter;
 
-        parent::__construct($message ?: $exception->getMessage(), null,  $exception);
+        parent::__construct($message, null, $exception);
+    }
+
+    /**
+     * @return Message
+     */
+    public function getMailMessage()
+    {
+        return $this->mailMessage;
     }
 
     /**
@@ -52,7 +50,7 @@ class MessageException extends Exception
         try {
             $formatter = $this->formatter;
             $string = (string)$formatter($this->getMessage(), $this->getMailMessage());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $string = $this->getMessage();
         }
 

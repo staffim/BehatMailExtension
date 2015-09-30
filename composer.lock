@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e09d7dd26c108b6487ca7c6fcf76c198",
+    "hash": "93092461b5b046b063020f83e5848b93",
     "packages": [
         {
             "name": "alexeyshockov/colada-x",
@@ -136,16 +136,16 @@
         },
         {
             "name": "behat/gherkin",
-            "version": "v4.3.0",
+            "version": "v4.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Behat/Gherkin.git",
-                "reference": "43777c51058b77bcd84a8775b7a6ad05e986b5db"
+                "reference": "6b3f8cf3560dc4909c4cddd4f1af3e1f6e9d80af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Behat/Gherkin/zipball/43777c51058b77bcd84a8775b7a6ad05e986b5db",
-                "reference": "43777c51058b77bcd84a8775b7a6ad05e986b5db",
+                "url": "https://api.github.com/repos/Behat/Gherkin/zipball/6b3f8cf3560dc4909c4cddd4f1af3e1f6e9d80af",
+                "reference": "6b3f8cf3560dc4909c4cddd4f1af3e1f6e9d80af",
                 "shasum": ""
             },
             "require": {
@@ -161,7 +161,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.4-dev"
                 }
             },
             "autoload": {
@@ -190,20 +190,20 @@
                 "gherkin",
                 "parser"
             ],
-            "time": "2014-06-06 01:24:32"
+            "time": "2015-09-29 13:41:19"
         },
         {
             "name": "behat/transliterator",
-            "version": "v1.0.1",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Behat/Transliterator.git",
-                "reference": "c93521d3462a554332d1ef5bb0e9b5b8ca4106c4"
+                "reference": "868e05be3a9f25ba6424c2dd4849567f50715003"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Behat/Transliterator/zipball/c93521d3462a554332d1ef5bb0e9b5b8ca4106c4",
-                "reference": "c93521d3462a554332d1ef5bb0e9b5b8ca4106c4",
+                "url": "https://api.github.com/repos/Behat/Transliterator/zipball/868e05be3a9f25ba6424c2dd4849567f50715003",
+                "reference": "868e05be3a9f25ba6424c2dd4849567f50715003",
                 "shasum": ""
             },
             "require": {
@@ -212,7 +212,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0-dev"
+                    "dev-master": "1.1-dev"
                 }
             },
             "autoload": {
@@ -230,7 +230,7 @@
                 "slug",
                 "transliterator"
             ],
-            "time": "2014-05-15 22:08:22"
+            "time": "2015-09-28 16:26:35"
         },
         {
             "name": "lstrojny/functional-php",
@@ -238,12 +238,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/lstrojny/functional-php.git",
-                "reference": "36e5c36e619204f98dc72bc9a3bf0bfc85ec9948"
+                "reference": "8ec61307eb119c919de6906065e38f47a954e78f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lstrojny/functional-php/zipball/36e5c36e619204f98dc72bc9a3bf0bfc85ec9948",
-                "reference": "36e5c36e619204f98dc72bc9a3bf0bfc85ec9948",
+                "url": "https://api.github.com/repos/lstrojny/functional-php/zipball/8ec61307eb119c919de6906065e38f47a954e78f",
+                "reference": "8ec61307eb119c919de6906065e38f47a954e78f",
                 "shasum": ""
             },
             "require": {
@@ -282,7 +282,7 @@
             "keywords": [
                 "functional"
             ],
-            "time": "2015-09-13 06:30:41"
+            "time": "2015-09-29 16:21:40"
         },
         {
             "name": "nikic/iter",
@@ -874,16 +874,16 @@
         },
         {
             "name": "zetacomponents/mail",
-            "version": "1.8.1",
+            "version": "dev-pop3-line-endings",
             "source": {
                 "type": "git",
-                "url": "https://github.com/zetacomponents/Mail.git",
-                "reference": "33f0fce2c156b26a850d495a3b069ad1c1e40854"
+                "url": "https://github.com/alexeyshockov/Mail.git",
+                "reference": "8a2b227ab3e4207714db45a63fc15c90d7823e3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zetacomponents/Mail/zipball/33f0fce2c156b26a850d495a3b069ad1c1e40854",
-                "reference": "33f0fce2c156b26a850d495a3b069ad1c1e40854",
+                "url": "https://api.github.com/repos/alexeyshockov/Mail/zipball/8a2b227ab3e4207714db45a63fc15c90d7823e3a",
+                "reference": "8a2b227ab3e4207714db45a63fc15c90d7823e3a",
                 "shasum": ""
             },
             "require": {
@@ -898,7 +898,6 @@
                     "src"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache-2.0"
             ],
@@ -934,18 +933,21 @@
                     "name": "Alexandru Stanoi"
                 },
                 {
-                    "name": "Christian Michel"
-                },
-                {
                     "name": "Sinisa Dukaric"
                 },
                 {
                     "name": "Mikko Koppanen"
+                },
+                {
+                    "name": "Christian Michel"
                 }
             ],
             "description": "The component allows you construct and/or parse Mail messages conforming to  the mail standard. It has support for attachments, multipart messages and HTML  mail. It also interfaces with SMTP to send mail or IMAP, POP3 or mbox to  retrieve e-mail.",
             "homepage": "https://github.com/zetacomponents",
-            "time": "2014-11-04 10:14:21"
+            "support": {
+                "source": "https://github.com/alexeyshockov/Mail/tree/pop3-line-endings"
+            },
+            "time": "2015-09-22 16:21:49"
         }
     ],
     "packages-dev": [
@@ -1560,13 +1562,14 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "zetacomponents/mail": 20,
         "lstrojny/functional-php": 20,
         "alexeyshockov/colada-x": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.4.0"
+        "php": "~5.6"
     },
     "platform-dev": []
 }

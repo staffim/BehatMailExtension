@@ -8,17 +8,17 @@ class PlainMessageFormatter extends BaseExceptionFormatter
 {
 
     /**
-     * @param string $message
-     * @param \Staffim\Behat\MailExtension\Message $mail
+     * @param string $text
+     * @param \Staffim\Behat\MailExtension\Message $message
      *
      * @return string
      */
-    public function __invoke($message, Message $mail)
+    public function __invoke($text, Message $message)
     {
-        $mailBody = $this->trimString($mail->getPlainMessage());
+        $mailBody = $this->trimString($message->getPlainMessage());
 
         return sprintf("%s\n\nPlain message:\n%s",
-            $message,
+            $text,
             $this->pipeString($mailBody."\n")
         );
     }

@@ -2,37 +2,35 @@
 
 namespace Staffim\Behat\MailExtension\Exception;
 
+use Exception;
+use Staffim\Behat\MailExtension\Exception\Exception as BaseException;
 use Staffim\Behat\MailExtension\Mailbox;
 
-class MailboxException extends Exception
+class MailboxException extends BaseException
 {
     /**
-     * Mailbox instance.
-     *
-     * @var \Staffim\Behat\MailExtension\Mailbox
+     * @var Mailbox
      */
     protected $mailbox;
 
     /**
-     * @return \Staffim\Behat\MailExtension\Mailbox
+     * @param string $message
+     * @param Mailbox $mailbox
+     * @param Exception $exception
+     */
+    public function __construct($message, Mailbox $mailbox, Exception $exception = null)
+    {
+        $this->mailbox = $mailbox;
+
+        parent::__construct($message, null, $exception);
+    }
+
+    /**
+     * @return Mailbox
      */
     public function getMailbox()
     {
         return $this->mailbox;
-    }
-
-    /**
-     * Initializes exception.
-     *
-     * @param string $message Optional.
-     * @param \Staffim\Behat\MailExtension\Mailbox $mailbox
-     * @param \Exception $exception
-     */
-    public function __construct($message = null, Mailbox $mailbox, \Exception $exception = null)
-    {
-        $this->mailbox = $mailbox;
-
-        parent::__construct($message ?: $exception->getMessage(), null,  $exception);
     }
 
     /**
@@ -43,12 +41,11 @@ class MailboxException extends Exception
     public function __toString()
     {
         try {
-            $mailboxList = $this->getMailbox()->getMailFromToSubject();
             $string = sprintf("%s\n\nMail messages:\n%s",
                 $this->getMessage(),
-                $this->pipeString($mailboxList."\n")
+                $this->pipeString((string)$this->getMailbox())
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->getMessage();
         }
 
@@ -62,8 +59,8 @@ class MailboxException extends Exception
      *
      * @return string
      */
-    // TODO Remove.
-    protected function pipeString($string)
+    // TODO Use method from BaseExceptionFormatter.
+    private function pipeString($string)
     {
         return '|  ' . strtr($string, array("\n" => "\n|  "));
     }

@@ -126,47 +126,6 @@ class Message
     }
 
     /**
-     * @return string
-     */
-    public function serializeAddressHeaders()
-    {
-        return 'From ' . $this->mail->from . ' to ' . $this->mail->to[0] . ' with subject ' . $this->mail->subject;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRawParsedMessage()
-    {
-        return $this->mail->generate();
-    }
-
-    /**
-     * @return string
-     */
-    public function getPlainMessage()
-    {
-        $plainMessage = explode('Content-Type: text/html;', $this->mail->generate())[0];
-
-        return $plainMessage;
-    }
-
-    /**
-     * @return string
-     */
-    public function getHtmlMessage()
-    {
-        $htmlMessage = 'No HTML version';
-
-        $mailParts = explode('Content-Type: text/html; charset=utf-8', $this->mail->generate());
-        if (count($mailParts) > 1) {
-            $htmlMessage = [1];
-        }
-
-        return $htmlMessage;
-    }
-
-    /**
      * @param string $text
      *
      * @return bool
@@ -233,5 +192,47 @@ class Message
         preg_match($pattern, $this->getBody(), $matches);
 
         return $matches;
+    }
+
+    /**
+     * @return string
+     */
+    public function toRaw()
+    {
+        return $this->mail->generate();
+    }
+
+    /**
+     * @return string
+     */
+    public function getPlainMessage()
+    {
+        $plainMessage = explode('Content-Type: text/html;', $this->mail->generate())[0];
+
+        return $plainMessage;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHtmlMessage()
+    {
+        $htmlMessage = 'No HTML version';
+
+        $mailParts = explode('Content-Type: text/html; charset=utf-8', $this->mail->generate());
+        if (count($mailParts) > 1) {
+            $htmlMessage = [1];
+        }
+
+        return $htmlMessage;
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        // TODO Support many recipients.
+        return "From {$this->mail->from} to {$this->mail->to[0]} with subject \"{$this->mail->subject}\"";
     }
 }

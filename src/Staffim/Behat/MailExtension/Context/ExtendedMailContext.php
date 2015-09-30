@@ -7,7 +7,7 @@ use Staffim\Behat\MailExtension\Exception\MailboxException;
 use Staffim\Behat\MailExtension\Exception\MessageException;
 
 /**
- * Additional steps for sending mail.
+ * Additional steps for sending mail. Sending is using less than retrieving mail.
  */
 // TODO This class may not works correctly for now. Fix it.
 class ExtendedMailContext extends RawMailContext

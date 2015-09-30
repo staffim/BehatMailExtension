@@ -8,9 +8,8 @@ use PhpOption\Option;
 
 use function Functional\select;
 use function Functional\map;
-use function Functional\first;
 use function Functional\last;
-use function Colada\x;
+use function Staffim\Behat\MailExtension\X\message;
 
 class Mailbox implements IteratorAggregate
 {
@@ -62,20 +61,23 @@ class Mailbox implements IteratorAggregate
      * @param callable $checker
      * @param int $time Time in milliseconds.
      *
-     * @return bool
+     * @return bool Waiting result (successful or not).
      */
     public function waitFor($checker, $time)
     {
         $start = microtime(true);
         $end = $start + $time / 1000.0;
 
-        do {
+        // Check condition first, with existing mailbox state.
+        $result = $checker($this);
+        while (!$result && (microtime(true) < $end)) {
+            // And retrieve new messages, if condition evaluated to false...
             $this->agent->retrieve();
 
             $result = $checker($this);
             // 0.5 second.
             usleep(500000);
-        } while ((microtime(true) < $end) && !$result);
+        }
 
         return $result;
     }
@@ -88,7 +90,7 @@ class Mailbox implements IteratorAggregate
      */
     public function waitForSize($size, $time)
     {
-        return $this->waitFor(function ($mailbox) use ($size) {
+        return $this->waitFor(function (Mailbox $mailbox) use ($size) {
             return $size <= $mailbox->getSize();
         }, $time);
     }
@@ -102,21 +104,7 @@ class Mailbox implements IteratorAggregate
      */
     public function getMailByText($text)
     {
-        return select($this->mails, x()->isContains($text));
-    }
-
-    /**
-     * Useful for debug.
-     *
-     * @return string
-     */
-    public function getMailFromToSubject()
-    {
-        if ($this->isEmpty()) {
-            return 'Mailbox is empty';
-        }
-
-        return implode("\n", map($this->mails, x()->serializeAddressHeaders()));
+        return select($this->mails, message()->isContains($text));
     }
 
     /**
@@ -124,9 +112,9 @@ class Mailbox implements IteratorAggregate
      *
      * @return array
      */
-    public function findBySubject($subject)
+    public function getBySubject($subject)
     {
-        return select($this->mails, x()->findInSubject($subject));
+        return select($this->mails, message()->findInSubject($subject));
     }
 
     /**
@@ -134,9 +122,9 @@ class Mailbox implements IteratorAggregate
      *
      * @return Option
      */
-    public function lastBySubject($subject)
+    public function findLastBySubject($subject)
     {
-        return Option::fromValue(last($this->findBySubject($subject)));
+        return Option::fromValue(last($this->getBySubject($subject)));
     }
 
     /**
@@ -144,9 +132,9 @@ class Mailbox implements IteratorAggregate
      *
      * @return array
      */
-    public function findByText($text)
+    public function getByText($text)
     {
-        return select($this->mails, x()->findInBody($text));
+        return select($this->mails, message()->findInBody($text));
     }
 
     /**
@@ -154,9 +142,9 @@ class Mailbox implements IteratorAggregate
      *
      * @return array
      */
-    public function findBySender($sender)
+    public function getBySender($sender)
     {
-        return select($this->mails, x()->findInFrom($sender));
+        return select($this->mails, message()->findInFrom($sender));
     }
 
     /**
@@ -164,9 +152,9 @@ class Mailbox implements IteratorAggregate
      *
      * @return array
      */
-    public function findByRecipient($address)
+    public function getByRecipient($address)
     {
-        return select($this->mails, x()->findInTo($address));
+        return select($this->mails, message()->findInTo($address));
     }
 
     /**
@@ -174,9 +162,9 @@ class Mailbox implements IteratorAggregate
      *
      * @return Option
      */
-    public function lastByRecipient($address)
+    public function findLastByRecipient($address)
     {
-        return Option::fromValue(last($this->findByRecipient($address)));
+        return Option::fromValue(last($this->getByRecipient($address)));
     }
 
     /**
@@ -184,8 +172,20 @@ class Mailbox implements IteratorAggregate
      *
      * @return array
      */
-    public function findByEqualSubject($subject)
+    public function getByConcreteSubject($subject)
     {
-        return select($this->mails, x()->isEqualBySubject($subject));
+        return select($this->mails, message()->isEqualBySubject($subject));
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        if ($this->isEmpty()) {
+            return 'Mailbox is empty';
+        }
+
+        return implode("\n", map($this->mails, message()->__toString())) . "\n";
     }
 }

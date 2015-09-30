@@ -1,0 +1,10 @@
+default:
+  suites:
+    default:
+      contexts:
+        - \Staffim\Behat\MailExtension\Context\MailContext
+        - FeatureContext
+  formatters:
+    pretty: ~
+  extensions:
+    Staffim\Behat\MailExtension\BehatMailExtension: ~

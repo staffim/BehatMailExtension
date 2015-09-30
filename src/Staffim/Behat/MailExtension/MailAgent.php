@@ -4,24 +4,39 @@ namespace Staffim\Behat\MailExtension;
 
 use ArrayObject;
 use ezcMail;
+use ezcMailAddress;
+use ezcMailComposer;
+use ezcMailFile;
+use ezcMailFileSet;
+use ezcMailMultipartMixed;
+use ezcMailParser;
+use ezcMailPop3Transport;
+use ezcMailPop3TransportOptions;
+use ezcMailSmtpTransport;
+use ezcMailSmtpTransportOptions;
+use ezcMailText;
+use ezcMailTools;
+use ezcMailTransportException;
+use InvalidArgumentException;
 
 use function iter\rewindable\map;
 use function iter\rewindable\filter;
+use function Staffim\Behat\MailExtension\X\message;
 
 class MailAgent implements MailAgentInterface
 {
     /**
-     * @var \ezcMailPop3Transport
+     * @var ezcMailPop3Transport
      */
     private $pop3Transport;
 
     /**
-     * @var \ezcMailSmtpTransport
+     * @var ezcMailSmtpTransport
      */
     private $smtpTransport;
 
     /**
-     * @var \ezcMailParser
+     * @var ezcMailParser
      */
     private $mailParser;
 
@@ -54,7 +69,7 @@ class MailAgent implements MailAgentInterface
         $this->pop3Account = $pop3Account;
         $this->smtpAccount = $smtpAccount;
 
-        $this->mailParser = new \ezcMailParser();
+        $this->mailParser = new ezcMailParser();
 
         $this->mailbox = new ArrayObject();
     }
@@ -83,7 +98,6 @@ class MailAgent implements MailAgentInterface
     /**
      * @return mixed
      */
-    // TODO Delete.
     private function countMail()
     {
         $this->connectPop3Server();
@@ -113,7 +127,7 @@ class MailAgent implements MailAgentInterface
      */
     public function getMailboxFor($address)
     {
-        return new Mailbox($this, filter(x()->isFor($address), $this->getMessages()));
+        return new Mailbox($this, filter(message()->isFor($address), $this->getMessages()));
     }
 
     /**
@@ -136,13 +150,20 @@ class MailAgent implements MailAgentInterface
                 $this->mailbox->append($mail);
             }
         }
+
+        return $this;
     }
 
     private function isMailAlreadyCopied(ezcMail $newMail)
     {
+        $messageId = $newMail->messageId;
+        if (null === $messageId) {
+            throw new InvalidArgumentException("Mail message doesn't have identifier.");
+        }
+
         /** @var ezcMail $mail */
         foreach ($this->mailbox as $mail) {
-            if ($mail->messageId == $newMail->messageId) {
+            if ($mail->messageId === $newMail->messageId) {
                 return true;
             }
         }
@@ -151,10 +172,13 @@ class MailAgent implements MailAgentInterface
     }
 
     /**
-     * @param \ezcMail $mail
+     * @param ezcMail $mail
      */
     public function send($mail)
     {
+        // TODO Check for Google's SMTP and alarm if address mismatch?..
+        // TODO Check for @example.com if using real SMTP? Google, for example...
+
         $this->connectSmtpServer();
         $mail->subjectCharset = 'utf-8';
         $this->smtpTransport->send($mail);
@@ -180,13 +204,13 @@ class MailAgent implements MailAgentInterface
      * @param string $to
      * @param array $attaches
      *
-     * @return \ezcMail
+     * @return ezcMail
      */
     public function createMessage($subject, $body, $from, $to, $attaches = [])
     {
-        $mail = new \ezcMailComposer();
-        $mail->from = new \ezcMailAddress($from);
-        $mail->addTo(new \ezcMailAddress($to));
+        $mail = new ezcMailComposer();
+        $mail->from = new ezcMailAddress($from);
+        $mail->addTo(new ezcMailAddress($to));
         $mail->headers->offsetSet('Reply-To', $from);
         $mail->subject = stripcslashes($subject);
         $mail->plainText = stripcslashes($body);
@@ -203,21 +227,21 @@ class MailAgent implements MailAgentInterface
     }
 
     /**
-     * @param \ezcMail $mail
+     * @param ezcMail $mail
      * @param string $text
      * @param string $fileName
      *
-     * @return \ezcMail
+     * @return ezcMail
      */
     public function createReplyMessage($mail, $text, $fileName = null)
     {
-        $replyMail = \ezcMailTools::replyToMail($mail, $mail->to[0]);
-        $textPart = new \ezcMailText($text, 'utf8', '8bit', 'utf8');
+        $replyMail = ezcMailTools::replyToMail($mail, $mail->to[0]);
+        $textPart = new ezcMailText($text, 'utf8', '8bit', 'utf8');
 
         if ($fileName) {
-            $fileAttachment = new \ezcMailFile($fileName);
+            $fileAttachment = new ezcMailFile($fileName);
             // Specify the body of the mail as a multipart-mixed of the text part and the file attachment
-            $replyMail->body = new \ezcMailMultipartMixed($textPart, $fileAttachment);
+            $replyMail->body = new ezcMailMultipartMixed($textPart, $fileAttachment);
         } else {
             $replyMail->body = $textPart;
         }
@@ -226,14 +250,14 @@ class MailAgent implements MailAgentInterface
     }
 
     /**
-     * @param \ezcMail $mail
+     * @param ezcMail $mail
      * @param string $filename
      *
-     * @return \ezcMail
+     * @return ezcMail
      */
     public function createReplyMessageFromFile($mail, $filename)
     {
-        $replyMail = \ezcMailTools::replyToMail($mail, $mail->to[0]);
+        $replyMail = ezcMailTools::replyToMail($mail, $mail->to[0]);
         $fileMail = $this->createMessageFromFile($filename);
         $replyMail->body = $fileMail->body;
 
@@ -245,45 +269,14 @@ class MailAgent implements MailAgentInterface
      *
      * @param string $filename
      *
-     * @return \ezcMail
+     * @return ezcMail
      */
     public function createMessageFromFile($filename)
     {
-        $set = new \ezcMailFileSet([$filename]);
+        $set = new ezcMailFileSet([$filename]);
         $mail = $this->mailParser->parseMail($set);
 
         return $mail[0];
-    }
-
-    /**
-     * Waits some time or number messages
-     *
-     * @deprecated Use Mailbox::waitForSize() instead.
-     *
-     * @param integer $time Time in milliseconds.
-     * @param integer $size
-     *
-     * @return bool
-     */
-    public function wait($time, $size = 0)
-    {
-        return $this->getMailbox()->waitForSize($size, $time);
-    }
-
-    private function connectSmtpServer()
-    {
-        $this->disconnectSmtp();
-
-        $smtpAccount = $this->smtpAccount;
-        $this->smtpTransport = new \ezcMailSmtpTransport(
-            $smtpAccount->getServerName(),
-            $smtpAccount->getLogin(),
-            $smtpAccount->getPassword(),
-            $smtpAccount->getPort(),
-            $smtpAccount->isSecure() ? new \ezcMailSmtpTransportOptions([
-                'connectionType' => \ezcMailSmtpTransport::CONNECTION_SSL
-            ]) : null
-        );
     }
 
     public function setSmtpAccount(Account $account)
@@ -293,14 +286,27 @@ class MailAgent implements MailAgentInterface
         $this->smtpAccount = $account;
     }
 
+    private function connectSmtpServer()
+    {
+        $this->disconnectSmtp();
+
+        $this->smtpTransport = new ezcMailSmtpTransport(
+            $this->smtpAccount->getServerName(),
+            $this->smtpAccount->getLogin(),
+            $this->smtpAccount->getPassword(),
+            $this->smtpAccount->getPort(),
+            $this->smtpAccount->isSecure() ? new ezcMailSmtpTransportOptions(['ssl' => true]) : []
+        );
+    }
+
     private function connectPop3Server()
     {
         $this->disconnectPop3();
 
-        $this->pop3Transport = new \ezcMailPop3Transport(
+        $this->pop3Transport = new ezcMailPop3Transport(
             $this->pop3Account->getServerName(),
             $this->pop3Account->getPort(),
-            $this->pop3Account->isSecure() ? new \ezcMailPop3TransportOptions(['ssl' => true]) : []
+            $this->pop3Account->isSecure() ? new ezcMailPop3TransportOptions(['ssl' => true]) : []
         );
         $this->pop3Transport->authenticate($this->pop3Account->getLogin(), $this->pop3Account->getPassword());
     }
@@ -311,7 +317,7 @@ class MailAgent implements MailAgentInterface
             if ($this->smtpTransport) {
                 $this->smtpTransport->disconnect();
             }
-        } catch (\ezcMailTransportException $e) {
+        } catch (ezcMailTransportException $e) {
             // Ignore transport exceptions.
         }
     }
@@ -322,7 +328,7 @@ class MailAgent implements MailAgentInterface
             if ($this->pop3Transport) {
                 $this->pop3Transport->disconnect();
             }
-        } catch (\ezcMailTransportException $e) {
+        } catch (ezcMailTransportException $e) {
             // Ignore transport exceptions.
         }
     }

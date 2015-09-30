@@ -4,7 +4,7 @@ namespace Staffim\Behat\MailExtension\Exception;
 
 use Staffim\Behat\MailExtension\Message;
 
-class BaseExceptionFormatter implements ExceptionFormatter
+class BaseExceptionFormatter
 {
     /**
      * Prepends every line in a string with pipe (|).
@@ -54,17 +54,17 @@ class BaseExceptionFormatter implements ExceptionFormatter
     }
 
     /**
-     * @param string $message
-     * @param \Staffim\Behat\MailExtension\Message $mail
+     * @param string $text
+     * @param Message $message
      *
      * @return string
      */
-    function __invoke($message, Message $mail)
+    public function __invoke($text, Message $message)
     {
-        $mailBody = $this->trimString($mail->getRawParsedMessage());
+        $mailBody = $this->trimString($message->toRaw());
 
         return sprintf("%s\n\nRaw message:\n%s",
-            $message,
+            $text,
             $this->pipeString($mailBody."\n")
         );
     }

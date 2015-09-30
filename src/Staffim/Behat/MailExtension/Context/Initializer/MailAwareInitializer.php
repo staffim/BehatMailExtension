@@ -34,6 +34,8 @@ class MailAwareInitializer implements ContextInitializer
         );
 
         $this->mailAgent = new MailAgent($pop3Account, $smtpAccount);
+
+        // TODO "pop3_keep_copy" setting.
     }
 
     /**

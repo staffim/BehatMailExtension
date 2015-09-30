@@ -3,17 +3,20 @@
 namespace Staffim\Behat\MailExtension\Context;
 
 use Staffim\Behat\MailExtension\Exception\MailboxException;
-use Staffim\Behat\MailExtension\Exception\MessageException;
 use Staffim\Behat\MailExtension\Exception\MessageBodyFormatter;
 use Staffim\Behat\MailExtension\Exception\PlainMessageFormatter;
 
+use function Staffim\Behat\MailExtension\X\message;
+use function Staffim\Behat\MailExtension\X\mailbox;
+
 /**
- * Only working with incoming mail.
+ * General context to work with incoming mail (over POP3).
  */
 class MailContext extends RawMailContext
 {
     /**
-     * @Given my mailbox is :address
+     * @Given my inbox is :address
+     * @When /^(?:|I )go to "(?P<address>(?:[^"]|\\")*)" inbox$/
      */
     public function myMailboxIs($address)
     {
@@ -21,25 +24,14 @@ class MailContext extends RawMailContext
     }
 
     /**
-     * @Then /^(?:|I )should see mail message with "(?P<text>(?:[^"]|\\")*)" in subject$/
-     */
-    public function iShouldSeeMailMessageWithTextInSubject($text)
-    {
-        $messages = $this->getMailbox()->findBySubject($text);
-        if (!count($messages)) {
-            throw new MailboxException(sprintf('Mail with "%s" in subject not found.', $text), $this->getMailbox());
-        }
-    }
-
-    /**
      * @When /^(?:|I )go to "(?P<subject>(?:[^"]|\\")*)" mail message$/
      */
     public function iGoToMailMessage($subject)
     {
-        $this->mail = $this->getMailbox()
-            ->lastBySubject($subject)
+        $this->message = $this->getMailbox()
+            ->findLastBySubject($subject)
             ->getOrThrow(new MailboxException(
-                sprintf('Mail with "%s" in subject text not found.', $subject),
+                sprintf('Mail with "%s" in subject not found.', $subject),
                 $this->getMailbox()
             ));
     }
@@ -49,8 +41,8 @@ class MailContext extends RawMailContext
      */
     public function iGoToMailMessageWithInRecipients($address)
     {
-        $this->mail = $this->getMailbox()
-            ->lastByRecipient($address)
+        $this->message = $this->getMailbox()
+            ->findLastByRecipient($address)
             ->getOrThrow(new MailboxException(
                 sprintf('Mail with "%s" in recipients not found', $address),
                 $this->getMailbox()
@@ -58,16 +50,25 @@ class MailContext extends RawMailContext
     }
 
     /**
+     * @Then /^(?:|I )should see mail message with "(?P<text>(?:[^"]|\\")*)" in subject$/
+     */
+    public function iShouldSeeMailMessageWithTextInSubject($text)
+    {
+        $this->expect(
+            mailbox()->getBySubject($text),
+            sprintf('Mail with "%s" in subject not found.', $text)
+        );
+    }
+
+    /**
      * @Then /^(?:|I )should see mail message with "(?P<address>(?:[^"]|\\")*)" in recipients$/
      */
-    public function iShouldSeeMailMessageWithAddressInRecepients($address)
+    public function iShouldSeeMailMessageWithAddressInRecipients($address)
     {
-        $this->getMailbox()
-            ->lastByRecipient($address)
-            ->getOrThrow(new MailboxException(
-                sprintf('Mail with "%s" in recipients not found', $address),
-                $this->getMailbox()
-            ));
+        $this->expect(
+            mailbox()->findLastByRecipient($address)->isDefined(),
+            sprintf('Mail with "%s" in recipients not found', $address)
+        );
     }
 
     /**
@@ -75,10 +76,10 @@ class MailContext extends RawMailContext
      */
     public function iShouldSeeMailMessageWithSubject($subject)
     {
-        $messages = $this->getMailbox()->findByEqualSubject($subject);
-        if (!count($messages)) {
-            throw new MailboxException(sprintf('Mail with "%s" subject not found.', $subject), $this->getMailbox());
-        }
+        $this->expect(
+            mailbox()->getByConcreteSubject($subject),
+            sprintf('Mail with "%s" subject not found.', $subject)
+        );
     }
 
     /**
@@ -86,13 +87,11 @@ class MailContext extends RawMailContext
      */
     public function iShouldSeeInMailMessage($text)
     {
-        if (!$this->getMail()->findInBody($text)) {
-            throw new MessageException(
-                sprintf('Mail with "%s" in message body not found.', $text),
-                $this->getMail(),
-                new MessageBodyFormatter()
-            );
-        }
+        $this->expectMessage(
+            message()->findInBody($text),
+            sprintf('Mail with "%s" in message body not found.', $text),
+            new MessageBodyFormatter()
+        );
     }
 
     /**
@@ -101,44 +100,23 @@ class MailContext extends RawMailContext
      */
     public function iShouldSeeAsReplyAddress($text)
     {
-        if (!$this->getMail()->findInFrom($text)) {
-            throw new MessageException(
-                sprintf('Mail with "%s" in address of message sender not found.', $text),
-                $this->getMail(),
-                new PlainMessageFormatter()
-            );
-        }
+        $this->expectMessage(
+            message()->findInFrom($text),
+            sprintf('Mail with "%s" in address of message sender not found.', $text),
+            new PlainMessageFormatter()
+        );
     }
 
     /**
-     * @Then /^(?:|I )should see "(?P<count>\d+)" new mail messag(e|es) after "(?P<time>\d+)" seconds$/
+     * Do we really need this check?..
+     *
+     * @Then /^(?:|I )should see at least (?P<number>\d+) mail messag(e|es)$/
      */
-    public function iShouldSeeNewMailMessagesAfterTime($count, $time)
+    public function iShouldSeeNewMailMessages($number)
     {
-        $this->waitForMessages($count, $time * 1000);
-    }
-
-    /**
-     * @Then /^(?:|I )should see "(?P<count>\d+)" new mail messag(e|es) after some waiting$/
-     */
-    public function iShouldSeeNewMailMessagesAfterWaiting($count)
-    {
-        $this->waitForMessages($count, $this->getMailAgentParameter('max_duration'));
-    }
-
-    /**
-     * @Then /^(?:|I )should see new mail message after some waiting$/
-     */
-    public function iShouldSeeNewMailMessageAfterWaiting()
-    {
-        $this->waitForMessages(1, $this->getMailAgentParameter('max_duration'));
-    }
-
-    private function waitForMessages($size, $sleepTime)
-    {
-        if (!$this->getMailbox()->waitForSize($size, $sleepTime)) {
+        if (!$this->getMailbox()->waitForSize($number, $this->getMailAgentParameter('max_duration'))) {
             throw new MailboxException(
-                sprintf('Not found %s mail messages after %s milliseconds', $size, $sleepTime),
+                sprintf("Mailbox doesn't have %s messages.", $number),
                 $this->getMailbox()
             );
         }

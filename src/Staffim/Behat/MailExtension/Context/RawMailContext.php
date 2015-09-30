@@ -2,10 +2,14 @@
 
 namespace Staffim\Behat\MailExtension\Context;
 
-use Behat\Behat\Context\TranslatableContext;
-use Behat\Behat\Hook\Scope\AfterScenarioScope;
-use Behat\Testwork\Tester\Result\TestResult;
 use InvalidArgumentException;
+use PhpOption\Option;
+use Behat\Behat\Context\TranslatableContext;
+use Behat\Behat\Hook\Scope\ScenarioScope;
+use Behat\Testwork\Tester\Result\TestResult;
+use Staffim\Behat\MailExtension\Exception\Exception;
+use Staffim\Behat\MailExtension\Exception\MailboxException;
+use Staffim\Behat\MailExtension\Exception\MessageException;
 use Staffim\Behat\MailExtension\MailAgent;
 use Staffim\Behat\MailExtension\Mailbox;
 use Staffim\Behat\MailExtension\Message;
@@ -25,7 +29,7 @@ class RawMailContext implements MailAwareInterface, TranslatableContext
     /**
      * @var Message
      */
-    protected $mail;
+    protected $message;
 
     /**
      * @var Mailbox
@@ -65,12 +69,21 @@ class RawMailContext implements MailAwareInterface, TranslatableContext
     }
 
     /**
+     * @deprecated Use getMessage() instead.
+     *
      * @return Message
      */
-    // TODO Use Option here.
     protected function getMail()
     {
-        return $this->mail;
+        return $this->message;
+    }
+
+    /**
+     * @return Option
+     */
+    protected function getMessage()
+    {
+        return Option::fromValue($this->message);
     }
 
     /**
@@ -104,26 +117,61 @@ class RawMailContext implements MailAwareInterface, TranslatableContext
     }
 
     /**
+     * @param callable $checker
+     * @param \Exception|string $exception
+     */
+    protected function expect($checker, $exception)
+    {
+        if (!$this->getMailbox()->waitFor($checker, $this->getMailAgentParameter('max_duration'))) {
+            if (is_object($exception) && ($exception instanceof \Exception)) {
+                throw $exception;
+            } else {
+                throw new MailboxException((string)$exception, $this->getMailbox());
+            }
+        }
+    }
+
+    /**
+     * @param callable $checker
+     * @param \Exception|string $exception
+     * @param callable $formatter Optional formatter for MessageException.
+     */
+    protected function expectMessage($checker, $exception, $formatter = null)
+    {
+        /** @var Message $message */
+        $message = $this->getMessage()->getOrThrow(new Exception('Mail message is not defined.'));
+
+        if (!$checker($message)) {
+            if (is_object($exception) && ($exception instanceof \Exception)) {
+                throw $exception;
+            } else {
+                throw new MessageException((string)$exception, $message, $formatter);
+            }
+        }
+    }
+
+    /**
      * @AfterScenario
      *
-     * @param AfterScenarioScope $event
+     * @param ScenarioScope $event
      */
-    public function saveMailMessageAfterFail(AfterScenarioScope $event) {
+    public function tryToSaveMessage(ScenarioScope $event)
+    {
         if (
             $this->getMailAgentParameter('failed_mail_dir')
+            // Only for failed scenarios.
             && ($event->getTestResult()->getResultCode() === TestResult::FAILED)
-            && $this->getMail()
         ) {
-            $scenario = $event->getScenario();
+            $this->getMessage()->forAll(function (Message $message) use ($event) {
+                $eventTitle = explode('features/', $event->getFeature()->getFile() . ':' . $event->getScenario()->getLine())[1];
+                $eventTitle = str_replace(['/', '\\'], '.', $eventTitle);
 
-            // TODO Repair this code for Behat 3.
-            $eventTitle = explode('features/', $scenario->getFile() . ':' . $scenario->getLine())[1];
-            $eventTitle = str_replace(['/', '\\'], '.', $eventTitle);
+                $mailTo = $message->getTo();
+                // TODO HTML?
+                $fileName = $eventTitle . $mailTo[0] . ':' . str_replace(['/', '\\'], '.', $message->getSubject() . '.html');
 
-            $mailTo = $this->getMail()->getTo();
-            $fileName = $eventTitle . $mailTo[0] . ':' . str_replace(['/', '\\'], '.', $this->getMail()->getSubject() . '.html');
-
-            file_put_contents($this->getMailAgentParameter('failed_mail_dir') . $fileName, $this->getMail()->getRawParsedMessage());
+                file_put_contents($this->getMailAgentParameter('failed_mail_dir') . $fileName, $message->toRaw());
+            });
         }
     }
 }
