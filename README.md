@@ -2,12 +2,33 @@
 
 Extension implements classical mail client (like Apple Mail, for example) in PHP with corresponding steps for Behat.
 
-## Using with Mailtrap.io
+## Usage in development
+
+Mailtrap.io or any other solution (cloud or self-hosted SMTP and POP3 servers) are useful for development, because you 
+can catch all application mail and profile it.
+
+### Mailtrap.io
+
+It's good to have separated inbox in Mailtrap.io only for acceptance testing (to prevent concurrent access from 
+people and machines).
+
+P.S.
 
 Mailtrap.io currently is not working with ezcMail (see https://github.com/zetacomponents/Mail/pull/40 for details). You 
-can use fork.
+should use fork.
 
-## Using with GMail
+## Usage in production
+
+If you would like to check you features on production environment, you should prepare your scenarios first. In 
+development environment you can use any addresses, because all mail will be caught by your preferred mail profile 
+service (Mailtrap.io, for example). But in production you can't: all mail needs to be sent to real addresses, and you 
+are limited to only those mailboxes to which you have access.
+
+One of available solutions to this problem is: having one real mailbox in production (example@example.com) and using 
+addresses with `+` sign (like example+applicant@example.com, example+recruiter@example.com and so on) in your scenarios. 
+In this case you will be able to check messages in any environment.
+
+### GMail
 
 To enable POP3 access to your GMail account, go to `"Forwarding and POP/IMAP"` and check `"Enable POP for all mail"`.
 Using `"delete Google Mail’s copy"` in `"When messages are accessed with POP"` is **required**, because Google doesn't 
@@ -17,17 +38,20 @@ It's good to use separated account and hold it only for needs of acceptance test
 
 ## Understanding Domain Model
 
-Domain model of this extension includes:
-* Mail Agent — service for end user to working with mail (like Apple Mail and Outlook). Same as Browser in Mink.
-* SMTP Server — host, port and all data for authentication.
-* POP3 Server — host, port and all data for authentication.
-* Inbox — virtual folder, concrete filter for all messages set.
-* Mail message — concrete letter with attachments and other data.
-* Mail — mail messages or concrete mail message.
+Goal of this extension is to provide convenient way to describe our actions in Behat scenarios (with predefined or 
+custom steps, that can be built with provided API). 
 
-## Local development (for contributors)
+And we all already understand main mail concepts, but let's define them again:
+* Mail Agent — end user's application to working with mailbox(es) (examples: Apple Mail, Outlook or GMail's web 
+interface). Same as Browser in Mink.
+* Mailbox — place to receive mail to and/or to deliver mail from (examples: concrete account in GMail or Hotmail, local 
+Exim or Postrix on your own server).
+* Inbox — folder inside mailbox for incoming mail. Usually you can create additional inbox folders with special filters 
+for mail.
 
-You can run bundled Behat features by creating `behat.yml` file inside root directory with POP3 and SMTP 
+## For contributors
+
+You can run bundled Behat features by creating `behat.yml` file inside root directory of the project with POP3 and SMTP 
 credentials, for example:
 
 ``` yaml
